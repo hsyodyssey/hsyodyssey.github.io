@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>一个Ethereum Transaction的生老病死 | Tech Draft</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="一个Ethereum Transaction的生老病死" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="State-based Blockchain" />
+<meta property="og:description" content="State-based Blockchain" />
+<link rel="canonical" href="http://localhost:4000/blockchain/2021/07/25/ethereum_txn.html" />
+<meta property="og:url" content="http://localhost:4000/blockchain/2021/07/25/ethereum_txn.html" />
+<meta property="og:site_name" content="Tech Draft" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-07-25T10:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="一个Ethereum Transaction的生老病死" />
+<script type="application/ld+json">
+{"description":"State-based Blockchain","headline":"一个Ethereum Transaction的生老病死","dateModified":"2021-07-25T10:00:00+08:00","datePublished":"2021-07-25T10:00:00+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/blockchain/2021/07/25/ethereum_txn.html"},"url":"http://localhost:4000/blockchain/2021/07/25/ethereum_txn.html","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Tech Draft" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Tech Draft</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">一个Ethereum Transaction的生老病死</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-07-25T10:00:00+08:00" itemprop="datePublished">Jul 25, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="state-based-blockchain">State-based Blockchain</h2>
+
+<ul>
+  <li>State-based Blockchain System 由两部分组成：World State 和 Blockchain。</li>
+  <li>Blockchain是以块为单位的数据结构，每个块中包含了若干Transaction。</li>
+  <li>Transaction是BlockchainSystem中与承载数据更新逻辑的载体。</li>
+  <li>World State表示了System中所有Account的值的一个Snapshot。</li>
+  <li>这个Snapshot的建立是以Block为单位的。</li>
+</ul>
+
+<h2 id="transaction是如何被打包并修改blockchain中的值的">Transaction是如何被打包并修改Blockchain中的值的</h2>
+
+<p>Transaction是用于修改Account的State的。若干个Transaction对修改的结果整合成一个新的World State</p>
+
+<p>当miner开始构造新的区块的时候。首先调用 miner/worker.go的 mainLoop() 函数。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span><span class="n">worker</span><span class="p">)</span> <span class="n">mainLoop</span><span class="p">()</span> <span class="p">{</span>
+    <span class="o">....</span>
+    <span class="n">coinbase</span> <span class="o">:=</span> <span class="n">w</span><span class="o">.</span><span class="n">coinbase</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">mu</span><span class="o">.</span><span class="n">RUnlock</span><span class="p">()</span>
+
+    <span class="n">txs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">map</span><span class="p">[</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">]</span><span class="n">types</span><span class="o">.</span><span class="n">Transactions</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">tx</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">ev</span><span class="o">.</span><span class="n">Txs</span> <span class="p">{</span>
+        <span class="n">acc</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">types</span><span class="o">.</span><span class="n">Sender</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">signer</span><span class="p">,</span> <span class="n">tx</span><span class="p">)</span>
+        <span class="n">txs</span><span class="p">[</span><span class="n">acc</span><span class="p">]</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">txs</span><span class="p">[</span><span class="n">acc</span><span class="p">],</span> <span class="n">tx</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">txset</span> <span class="o">:=</span> <span class="n">types</span><span class="o">.</span><span class="n">NewTransactionsByPriceAndNonce</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">signer</span><span class="p">,</span> <span class="n">txs</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">BaseFee</span><span class="p">)</span>
+    <span class="n">tcount</span> <span class="o">:=</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">tcount</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">commitTransactions</span><span class="p">(</span><span class="n">txset</span><span class="p">,</span> <span class="n">coinbase</span><span class="p">,</span> <span class="no">nil</span><span class="p">)</span>        
+    <span class="o">....</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Worker会从TransactionPool中拿出若干的transaction, 赋值给<em>txs</em>, 然后按照Price和Nonce对<em>txs</em>进行排序，并将结果赋值给<em>txset</em>。</p>
+
+<p>在拿到<em>txset</em>之后，mainLoop函数会调用miner/worker.go的commitTransactions()函数。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span><span class="n">worker</span><span class="p">)</span> <span class="n">commitTransactions</span><span class="p">(</span><span class="n">txs</span> <span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">TransactionsByPriceAndNonce</span><span class="p">,</span> <span class="n">coinbase</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">,</span> <span class="n">interrupt</span> <span class="o">*</span><span class="kt">int32</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="o">....</span>
+
+    <span class="c">// 首先给Block设置最大可以使用的Gas的上限</span>
+    <span class="n">gasLimit</span> <span class="o">:=</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">GasLimit</span>
+    <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">gasPool</span> <span class="o">==</span> <span class="no">nil</span> <span class="p">{</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">gasPool</span> <span class="o">=</span> <span class="nb">new</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">GasPool</span><span class="p">)</span><span class="o">.</span><span class="n">AddGas</span><span class="p">(</span><span class="n">gasLimit</span><span class="p">)</span>
+    <span class="c">// 函数的主体是一个For循环</span>
+    <span class="k">for</span><span class="p">{</span>
+    <span class="o">.....</span>
+        <span class="c">// params.TxGas表示了transaction 需要的最少的Gas的数量</span>
+        <span class="c">// w.current.gasPool.Gas()可以获取当前block剩余可以用的Gas的Quota，如果剩余的Gas足以开启一个新的Tx，那么循环结束</span>
+        <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">gasPool</span><span class="o">.</span><span class="n">Gas</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">params</span><span class="o">.</span><span class="n">TxGas</span> <span class="p">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">Trace</span><span class="p">(</span><span class="s">"Not enough gas for further transactions"</span><span class="p">,</span> <span class="s">"have"</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">gasPool</span><span class="p">,</span> <span class="s">"want"</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">TxGas</span><span class="p">)</span><span class="k">break</span>
+    <span class="p">}</span>
+    <span class="o">....</span>
+    <span class="n">tx</span> <span class="o">:=</span> <span class="n">txs</span><span class="o">.</span><span class="n">Peek</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">tx</span> <span class="o">==</span> <span class="no">nil</span> <span class="p">{</span>
+        <span class="k">break</span>
+    <span class="p">}</span>
+    <span class="o">....</span>
+    <span class="n">logs</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">w</span><span class="o">.</span><span class="n">commitTransaction</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="n">coinbase</span><span class="p">)</span>
+    <span class="o">....</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>commitTransactions()函数的主体是一个for循环，每次获取txs.Peek()的tx，并作为参数调用函数miner/worker.go的commitTransaction()</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span><span class="n">worker</span><span class="p">)</span> <span class="n">commitTransaction</span><span class="p">(</span><span class="n">tx</span> <span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">Transaction</span><span class="p">,</span> <span class="n">coinbase</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">)</span> <span class="p">([]</span><span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">Log</span><span class="p">,</span> <span class="kt">error</span><span class="p">){</span>
+    <span class="c">// 在每次commitTransaction执行前都要记录当前StateDB的Snapshot,一旦交易执行失败则基于这个Snapshot进行回滚。</span>
+    <span class="c">// TODO StateDB如何进行快照(Snapshot)和回滚的</span>
+    <span class="n">snap</span> <span class="o">:=</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">Snapshot</span><span class="p">()</span>
+    <span class="c">// 调用执行Transaction的函数</span>
+    <span class="n">receipt</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">core</span><span class="o">.</span><span class="n">ApplyTransaction</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">chainConfig</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">chain</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">coinbase</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">gasPool</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="n">tx</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">w</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">GasUsed</span><span class="p">,</span> <span class="o">*</span><span class="n">w</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">GetVMConfig</span><span class="p">())</span>
+    <span class="o">....</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Blockchain系统中的Transaction和DBMS中的Transaction一样，要么完成要么失败。所以在调用执行Transaction的函数前，首先记录了一下当前world state的Snapshot，当交易失败时回滚Transaction。之后调用core/state_processor.go/ApplyTransaction()函数。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">ApplyTransaction</span><span class="p">(</span><span class="n">config</span> <span class="o">*</span><span class="n">params</span><span class="o">.</span><span class="n">ChainConfig</span><span class="p">,</span> <span class="n">bc</span> <span class="n">ChainContext</span><span class="p">,</span> <span class="n">author</span> <span class="o">*</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">,</span> <span class="n">gp</span> <span class="o">*</span><span class="n">GasPool</span><span class="p">,</span> <span class="n">statedb</span> <span class="o">*</span><span class="n">state</span><span class="o">.</span><span class="n">StateDB</span><span class="p">,</span> <span class="n">header</span> <span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">Header</span><span class="p">,</span> <span class="n">tx</span> <span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">Transaction</span><span class="p">,</span> <span class="n">usedGas</span> <span class="o">*</span><span class="kt">uint64</span><span class="p">,</span> <span class="n">cfg</span> <span class="n">vm</span><span class="o">.</span><span class="n">Config</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">Receipt</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c">// 将Transaction 转化为Message的形式</span>
+    <span class="n">msg</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">tx</span><span class="o">.</span><span class="n">AsMessage</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">MakeSigner</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">Number</span><span class="p">),</span> <span class="n">header</span><span class="o">.</span><span class="n">BaseFee</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">err</span>
+    <span class="p">}</span>
+    <span class="c">// Create a new context to be used in the EVM environment</span>
+    <span class="n">blockContext</span> <span class="o">:=</span> <span class="n">NewEVMBlockContext</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">author</span><span class="p">)</span>
+    <span class="n">vmenv</span> <span class="o">:=</span> <span class="n">vm</span><span class="o">.</span><span class="n">NewEVM</span><span class="p">(</span><span class="n">blockContext</span><span class="p">,</span> <span class="n">vm</span><span class="o">.</span><span class="n">TxContext</span><span class="p">{},</span> <span class="n">statedb</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+    <span class="c">// 调用执行Contract的函数</span>
+    <span class="k">return</span> <span class="n">applyTransaction</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">author</span><span class="p">,</span> <span class="n">gp</span><span class="p">,</span> <span class="n">statedb</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">Hash</span><span class="p">(),</span> <span class="n">tx</span><span class="p">,</span> <span class="n">usedGas</span><span class="p">,</span> <span class="n">vmenv</span><span class="p">)</span>
+<span class="p">}</span>   
+</code></pre></div></div>
+
+<p>在 ApplyTransaction()函数中首先Transaction会被转换成Message的形式，方便调用。在执行每一个Transaction的时候，都会生成一个新的EVM来执行。之后调用core/state_processor.go/applyTransaction()函数来执行Message。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">applyTransaction</span><span class="p">(</span><span class="n">msg</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">config</span> <span class="o">*</span><span class="n">params</span><span class="o">.</span><span class="n">ChainConfig</span><span class="p">,</span> <span class="n">bc</span> <span class="n">ChainContext</span><span class="p">,</span> <span class="n">author</span> <span class="o">*</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">,</span> <span class="n">gp</span> <span class="o">*</span><span class="n">GasPool</span><span class="p">,</span> <span class="n">statedb</span> <span class="o">*</span><span class="n">state</span><span class="o">.</span><span class="n">StateDB</span><span class="p">,</span> <span class="n">blockNumber</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">blockHash</span> <span class="n">common</span><span class="o">.</span><span class="n">Hash</span><span class="p">,</span> <span class="n">tx</span> <span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">Transaction</span><span class="p">,</span> <span class="n">usedGas</span> <span class="o">*</span><span class="kt">uint64</span><span class="p">,</span> <span class="n">evm</span> <span class="o">*</span><span class="n">vm</span><span class="o">.</span><span class="n">EVM</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">Receipt</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">....</span>
+    <span class="c">// Apply the transaction to the current state (included in the env).</span>
+    <span class="n">result</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">ApplyMessage</span><span class="p">(</span><span class="n">evm</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">gp</span><span class="p">)</span>
+    <span class="o">....</span>
+
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>之后调用core/state_transition.go/ApplyMessage()函数。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">ApplyMessage</span><span class="p">(</span><span class="n">evm</span> <span class="o">*</span><span class="n">vm</span><span class="o">.</span><span class="n">EVM</span><span class="p">,</span> <span class="n">msg</span> <span class="n">Message</span><span class="p">,</span> <span class="n">gp</span> <span class="o">*</span><span class="n">GasPool</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">ExecutionResult</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">NewStateTransition</span><span class="p">(</span><span class="n">evm</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">gp</span><span class="p">)</span><span class="o">.</span><span class="n">TransitionDb</span><span class="p">()</span>
+    <span class="p">}</span>   
+</code></pre></div></div>
+
+<p>之后调用core/state_transition.go/TransitionDb()函数。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// TransitionDb will transition the state by applying the current message and</span>
+<span class="c">// returning the evm execution result with following fields.</span>
+<span class="c">//</span>
+<span class="c">// - used gas:</span>
+<span class="c">//      total gas used (including gas being refunded)</span>
+<span class="c">// - returndata:</span>
+<span class="c">//      the returned data from evm</span>
+<span class="c">// - concrete execution error:</span>
+<span class="c">//      various **EVM** error which aborts the execution,</span>
+<span class="c">//      e.g. ErrOutOfGas, ErrExecutionReverted</span>
+<span class="c">//</span>
+<span class="c">// However if any consensus issue encountered, return the error directly with</span>
+<span class="c">// nil evm execution result.</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">st</span> <span class="o">*</span><span class="n">StateTransition</span><span class="p">)</span> <span class="n">TransitionDb</span><span class="p">()</span> <span class="p">(</span><span class="o">*</span><span class="n">ExecutionResult</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">....</span>
+    <span class="n">ret</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">gas</span><span class="p">,</span> <span class="n">vmerr</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">evm</span><span class="o">.</span><span class="n">Call</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">to</span><span class="p">(),</span> <span class="n">st</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">gas</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="o">....</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>之后调用core/vm/evm.go/Call()函数。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">evm</span> <span class="o">*</span><span class="n">EVM</span><span class="p">)</span> <span class="n">Call</span><span class="p">(</span><span class="n">caller</span> <span class="n">ContractRef</span><span class="p">,</span> <span class="n">addr</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">,</span> <span class="n">input</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="n">gas</span> <span class="kt">uint64</span><span class="p">,</span> <span class="n">value</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span><span class="p">)</span> <span class="p">(</span><span class="n">ret</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="n">leftOverGas</span> <span class="kt">uint64</span><span class="p">,</span> <span class="n">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">....</span>
+    <span class="n">ret</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">evm</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span><span class="n">contract</span><span class="p">,</span> <span class="n">input</span><span class="p">,</span> <span class="no">false</span><span class="p">)</span>
+    <span class="o">....</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>之后调用core/vm/interpreter.go/Run()函数。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Run loops and evaluates the contract's code with the given input data and returns</span>
+<span class="c">// the return byte-slice and an error if one occurred.</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">in</span> <span class="o">*</span><span class="n">EVMInterpreter</span><span class="p">)</span> <span class="n">Run</span><span class="p">(</span><span class="n">contract</span> <span class="o">*</span><span class="n">Contract</span><span class="p">,</span> <span class="n">input</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="n">readOnly</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">(</span><span class="n">ret</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="n">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">....</span>
+    <span class="n">cost</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">constantGas</span> <span class="c">// For tracing</span>
+    <span class="c">// UseGas 函数：当前剩余的gas quota减去input 参数。</span>
+    <span class="c">// 剩余的gas 小于input直接返回false</span>
+    <span class="c">// 否则当前的gas quota减去input并返回true</span>
+    <span class="k">if</span> <span class="o">!</span><span class="n">contract</span><span class="o">.</span><span class="n">UseGas</span><span class="p">(</span><span class="n">operation</span><span class="o">.</span><span class="n">constantGas</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">ErrOutOfGas</span>
+        <span class="p">}</span>
+    <span class="o">....</span>
+    <span class="c">// execute the operation</span>
+    <span class="n">res</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pc</span><span class="p">,</span> <span class="n">in</span><span class="p">,</span> <span class="n">callContext</span><span class="p">)</span>
+    <span class="o">....</span>
+
+<span class="p">}</span>
+</code></pre></div></div>
+<p>更细粒度的对每个opcode循环调用core/vm/jump_table.go中的execute函数。</p>
+
+<p>每个OPCODE的具体实现在core/vm/instructor.go中,比如对Contract中持久化数据修改的OPSSTORE指令的实现位于opStore()函数中。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">opSstore</span><span class="p">(</span><span class="n">pc</span> <span class="o">*</span><span class="kt">uint64</span><span class="p">,</span> <span class="n">interpreter</span> <span class="o">*</span><span class="n">EVMInterpreter</span><span class="p">,</span> <span class="n">scope</span> <span class="o">*</span><span class="n">ScopeContext</span><span class="p">)</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">loc</span> <span class="o">:=</span> <span class="n">scope</span><span class="o">.</span><span class="n">Stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">val</span> <span class="o">:=</span> <span class="n">scope</span><span class="o">.</span><span class="n">Stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="c">//根据指令跟地址来修改StateDB中某一存储位置的值。</span>
+    <span class="n">interpreter</span><span class="o">.</span><span class="n">evm</span><span class="o">.</span><span class="n">StateDB</span><span class="o">.</span><span class="n">SetState</span><span class="p">(</span><span class="n">scope</span><span class="o">.</span><span class="n">Contract</span><span class="o">.</span><span class="n">Address</span><span class="p">(),</span><span class="n">loc</span><span class="o">.</span><span class="n">Bytes32</span><span class="p">(),</span> <span class="n">val</span><span class="o">.</span><span class="n">Bytes32</span><span class="p">())</span>
+    <span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="no">nil</span>
+<span class="p">}</span>
+
+<span class="c">//core/state/stateDB</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span><span class="n">StateDB</span><span class="p">)</span> <span class="n">SetState</span><span class="p">(</span><span class="n">addr</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="n">common</span><span class="o">.</span><span class="n">Hash</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">stateObject</span> <span class="o">:=</span> <span class="n">s</span><span class="o">.</span><span class="n">GetOrNewStateObject</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">stateObject</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+    <span class="n">stateObject</span><span class="o">.</span><span class="n">SetState</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">db</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样就完成了从transaction到从StateDB中获取Code，然后修改StateDB中的值的闭环。</p>
+
+<ul>
+  <li>commitTransactions -» commitTransaction -» ApplyTransaction -» applyTransaction -»  ApplyMessage -» TransactionDB -» Call  -» Run -» opSstore</li>
+</ul>
+
+<h2 id="reference">Reference</h2>
+
+<ol>
+  <li>https://www.codenong.com/cs105936343/</li>
+  <li>https://yangzhe.me/2019/08/12/ethereum-evm/</li>
+</ol>
+
+  </div><a class="u-url" href="/blockchain/2021/07/25/ethereum_txn.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Tech Draft</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Tech Draft</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/hsyodyssey"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">hsyodyssey</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Researching and Thinking</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
