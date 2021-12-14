@@ -29,7 +29,7 @@ twitter_username: siyuanhanust
 github_username:  hsyodyssey
 
 # Build settings
-theme: jekyll-text-theme
+theme: minima
 plugins:
   - jekyll-feed
 
