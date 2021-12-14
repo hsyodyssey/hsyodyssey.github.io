@@ -23,13 +23,13 @@ email:
 description: >- # this means to ignore newlines until "baseurl:"
   Researching and Thinking
 
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "/blog" # the subpath of your site, e.g. /blog
 url: "http://www.hsyodyssey.com" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: 
+twitter_username: siyuanhanust
 github_username:  hsyodyssey
 
 # Build settings
-theme: minima
+theme: jekyll-text-theme
 plugins:
   - jekyll-feed
 
