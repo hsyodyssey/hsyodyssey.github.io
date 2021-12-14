@@ -1,0 +1,169 @@
+I"C"<h2 id="introduction">Introduction</h2>
+
+<p>This repo records the daily programming nodes of Golang.</p>
+
+<h2 id="why-golang">Why Golang?</h2>
+
+<p>Golang是一种非常适合分布式系统/数据库(Distributed System/database)，区块链(Blockchain)项目开发的编程语言，因为:</p>
+
+<ul>
+  <li><strong>语法简单</strong>。它学习曲线平滑。有其他高级语言编程经验的开发人员，可以快速上手。</li>
+  <li><strong>高并发基因</strong>。它提供了强大简洁易用稳定的标准库，对高并发，分布式程序有更加灵活简洁全面的标准库支持。不需要依赖第三方库就可以快速构建后端/网络/高并发应用。</li>
+  <li><strong>跨平台</strong>。它支持跨系统交叉编译。MacOS/Win 也可以编译Linux下可以运行的程序，不需要担心环境依赖的问题。</li>
+  <li><strong>新</strong>。相对于C/C++，Golang的设计理念更新，历史包袱更少。对各种<del>新型数据结构</del>比如JSON, CSV提供了简洁流畅的原生标准库支持。</li>
+  <li><strong>快</strong>。它相比C++编译快，相比Python运行快。</li>
+</ul>
+
+<p>所以Golang非常适合做一些分布式系统/数据库，区块链领域的学术/工程项目的原型(Prototype)开发工作。</p>
+
+<h2 id="不足">不足</h2>
+
+<ul>
+  <li><strong>轮子少</strong>。相比于Java生态系统中充足的轮子，Go社区中的轮子的发展还属于初级阶段。</li>
+  <li><strong>代码冗余</strong>。相比于C++，Golang对范型(Generic Programming)支持较差。对同一份逻辑，不同的数据结构需要重复的代码。</li>
+</ul>
+
+<h2 id="general-tips">General Tips</h2>
+
+<ul>
+  <li>保持包名和目录名的一致。</li>
+  <li>包名尽量简短，应该为小写单词，不要使用下划线或者驼峰式命名。</li>
+  <li>文件名为小写单词，使用下划线分割。</li>
+  <li>Go语言区分大小写，小写字母开头的单词为包内访问，相当于Java/C++中的Private。跨包使用的成员变量/函数要使用大写字母开头。</li>
+  <li>变量和结构体的命名使用驼峰式。</li>
+  <li>通过更改首字母的大小写，来控制结构体的使用场景。</li>
+  <li>常量通常使用全部大写字母。</li>
+  <li>Go结构体默认的小写字母开头的变量不是public的不能跨包访问。</li>
+  <li>通过go run *.go 或者 go build .的方式来运行多文件同package的go程序</li>
+  <li>Go语言中包括数组和Slice两种集合型数据结构。</li>
+  <li>Go语言中的数据大小是固定的。</li>
+  <li>Go语言中中Slice(切片)的大小可以是动态的。</li>
+  <li>Go语言中，可以定义一个不指明长度的切片。</li>
+  <li>二维切片需要初始化:</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c">//2-D Slice init</span>
+    <span class="c">// 初始化一个n行m列的切片</span>
+    <span class="k">var</span> <span class="n">K</span><span class="p">[][]</span> <span class="kt">int</span><span class="o">.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="o">:=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
+        <span class="n">inline</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+        <span class="n">K</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">inline</span><span class="p">)</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Go 自带了解析CSV的库 “encoding/csv”</li>
+  <li>Go Interface 是一种type</li>
+  <li>要实现Interface 必须实现interface中所有的方法</li>
+  <li>使用runtime Package中的 MemStats 和 ReadMemStats 来测量当前程序中Memory的使用状况。</li>
+  <li>Context 是 Go 1.7 之后新引入的标准库接口。</li>
+  <li>sync/atomic标准库包中提供的原子操作，通常是无锁的。</li>
+  <li>Function Types: A function type denotes the set of all functions with the same parameter and result types.</li>
+  <li>当初始化结构体时，对于结构体中复杂的成员，需要显式的声明它的类型信息，否则编译无法通过。
+    <ul>
+      <li>For example:</li>
+    </ul>
+
+    <pre><code class="language-Go">var pd1 PaperDetails = PaperDetails{
+Title:  "testtitle",
+Topics: []string{"test topic1", "test topic2"},
+
+Authors:      []string{"test author1", "test author2"},
+Comments:     []string{"test comment1"},
+Keysentencts: map[string][]Sentence{"test topic1": {sent1, sent2}, "test topic2": {sent2, sent3}},
+}
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="go-struct">Go Struct</h2>
+
+<p>Struct是是Go语言中最重要的自定义的数据结构之一。它的用法与C++/Java中的class既有相同点又有不同点。</p>
+
+<ul>
+  <li>Struct 有两种初始化方式:
+    <ul>
+      <li>
+        <p>指针的方式, 这种方式会返回一个指向新的结构体的指针:</p>
+
+        <pre><code class="language-Golang">var s * Student
+s = new(Student)
+s.name = "test"
+
+\\or
+var s = new (Student)
+s.name = "test"
+</code></pre>
+      </li>
+      <li>
+        <p>With a struct literal, 这种方式会返回一个值变量(等于第一种方式的*s):</p>
+
+        <pre><code class="language-Golang">s := Student{
+  name: "test",
+}
+</code></pre>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="map">Map</h2>
+
+<ul>
+  <li>可以通过第二个返回值的方式来判断map中是否存在目标key。</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="n">sting</span><span class="p">)</span>
+<span class="n">m</span><span class="p">[</span><span class="s">"001"</span><span class="p">]</span> <span class="o">=</span> <span class="s">"test001"</span>
+<span class="n">m</span><span class="p">[</span><span class="s">"002"</span><span class="p">]</span> <span class="o">=</span> <span class="s">"test002"</span>
+<span class="n">value</span><span class="p">,</span> <span class="n">isExist</span> <span class="o">:=</span> <span class="n">m</span><span class="p">[</span><span class="s">"001"</span><span class="p">]</span> <span class="c">// value: string: test001, isExist: bool : true</span>
+<span class="n">value</span><span class="p">,</span> <span class="n">isExist</span> <span class="o">:=</span> <span class="n">m</span><span class="p">[</span><span class="s">"003"</span><span class="p">]</span> <span class="c">// value: , isExist: bool : false</span>
+
+</code></pre></div></div>
+
+<h2 id="fqa">FQA</h2>
+
+<ul>
+  <li>What is struct{} and struct{}{} ?
+    <ul>
+      <li>struct{} 表示一个零元素的struct结构。通常会被用在没有任何信息被存储的场景中。</li>
+      <li>struct{}{} 表示一个存储了struct{}的Composite literal.</li>
+      <li>Source: <a href="https://stackoverflow.com/questions/45122905/how-do-struct-and-struct-work-in-go">Stackoverflow</a></li>
+      <li>interface是一种万能的数据类型，他可以接受任何类型的值。</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="go-unit-testing">Go Unit Testing</h2>
+
+<ul>
+  <li>Go 单元测试中，执行到t.Error()/ t.Errorf() 测试函数会输出错误的log信息并继续执行。</li>
+  <li>Go 单元测试中，执行到t.Fatal()/ t.Fatalf() 测试函数会输出错误的log信息并结束测试。</li>
+  <li>Go 单元测试中，如果不满足断言assert.Equal() 测试函数会结束并报错。</li>
+</ul>
+
+<h2 id="go-and-c-and-python">Go and C and Python</h2>
+
+<ul>
+  <li>Python 可以调用Go编译的动态链接库 and.so (Shared Object)</li>
+  <li>Go编译成so文件时，需要在函数上一行添加//export xxx(函数名).
+    <ul>
+      <li>注意//与export中间不能有空格</li>
+      <li>Example 位于example/pygo</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="log">Log</h2>
+
+<ul>
+  <li>Log.Fatal会直接退出程序，不会执行defer相关的函数</li>
+</ul>
+
+<h2 id="reference">Reference</h2>
+
+<ul>
+  <li>Go语言高性能编程<a href="https://geektutu.com/post/high-performance-go.html">link</a></li>
+  <li>Go By Example<a href="https://gobyexample.com/">link</a></li>
+</ul>
+:ET

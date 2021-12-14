@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title:  "[Re]怎样当好一名师长"
 date:   2021-11-13 10:00:00 +0800
 tags: Working 
