@@ -296,11 +296,9 @@ pragma solidity >=0.7.0 <0.9.0;
  */
 contract Storage {
 
-
     uint256 number;
     address addr;
     bool isTrue;
-
 
     function stores(uint256 num) public {
         // number1 = num + 1;
