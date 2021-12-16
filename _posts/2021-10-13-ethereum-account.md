@@ -287,11 +287,9 @@ contract Storage {
 
 在下面的示例中，我们声明了三个变量，分别是number(uint256)，addr(address)，以及isTrue(bool)。我们知道，在以太坊中Address是一个长度为20 bytes的字符串，所以一个Address类型是没办法填满整个的Slot的。布尔类型在以太坊中只需要一个bit(0 or 1)就可以表示. 我们构造transaction调用函数storeaddr。函数的input为1 “0xb6186d3a3D32232BB21E87A33a4E176853a49d12”。
 
-```Solidity
+```solidity
 // SPDX-License-Identifier: GPL-3.0
-
 pragma solidity >=0.7.0 <0.9.0;
-
 /**
  * @title Storage
  * @dev Store & retrieve value in a variable
