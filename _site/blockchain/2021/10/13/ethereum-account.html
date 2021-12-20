@@ -423,9 +423,7 @@
 <p>我们使用一个简单的合约来展示Contract Storage层的逻辑，合约代码如下所示。在本例中，Storage合约保存了三个持久化uint256 变量(number, number1, and number2)，并通过stores函数给它们进行赋值。</p>
 
 <div class="language-solidity highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// SPDX-License-Identifier: GPL-3.0
-</span>
-<span class="k">pragma</span> <span class="n">solidity</span> <span class="o">&gt;=</span><span class="mf">0.7</span><span class="p">.</span><span class="mi">0</span> <span class="o">&lt;</span><span class="mf">0.9</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
-
+</span><span class="k">pragma</span> <span class="n">solidity</span> <span class="o">&gt;=</span><span class="mf">0.7</span><span class="p">.</span><span class="mi">0</span> <span class="o">&lt;</span><span class="mf">0.9</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
 <span class="cm">/**
 * @title Storage
 * @dev Store &amp; retrieve value in a variable
@@ -590,39 +588,35 @@
 
 <p>在下面的示例中，我们声明了三个变量，分别是number(uint256)，addr(address)，以及isTrue(bool)。我们知道，在以太坊中Address是一个长度为20 bytes的字符串，所以一个Address类型是没办法填满整个的Slot的。布尔类型在以太坊中只需要一个bit(0 or 1)就可以表示. 我们构造transaction调用函数storeaddr。函数的input为1 “0xb6186d3a3D32232BB21E87A33a4E176853a49d12”。</p>
 
-<pre><code class="language-Solidity">// SPDX-License-Identifier: GPL-3.0
-
-pragma solidity &gt;=0.7.0 &lt;0.9.0;
-
-/**
+<div class="language-solidity highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// SPDX-License-Identifier: GPL-3.0
+</span><span class="k">pragma</span> <span class="n">solidity</span> <span class="o">&gt;=</span><span class="mf">0.7</span><span class="p">.</span><span class="mi">0</span> <span class="o">&lt;</span><span class="mf">0.9</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+<span class="cm">/**
  * @title Storage
  * @dev Store &amp; retrieve value in a variable
- */
-contract Storage {
+ */</span>
+<span class="k">contract</span> <span class="n">Storage</span> <span class="p">{</span>
 
+    <span class="kt">uint256</span> <span class="n">number</span><span class="p">;</span>
+    <span class="kt">address</span> <span class="n">addr</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">isTrue</span><span class="p">;</span>
 
-    uint256 number;
-    address addr;
-    bool isTrue;
-
-
-    function stores(uint256 num) public {
-        // number1 = num + 1;
-        // number2 = num + 2;
-    }
+    <span class="k">function</span> <span class="n">stores</span><span class="p">(</span><span class="kt">uint256</span> <span class="n">num</span><span class="p">)</span> <span class="k">public</span> <span class="p">{</span>
+        <span class="c1">// number1 = num + 1;
+</span>        <span class="c1">// number2 = num + 2;
+</span>    <span class="p">}</span>
     
-    function storeaddr(uint256 num, address a) public {
-        number = num;
-        addr = a;
-        isTure = true;
-    }
+    <span class="k">function</span> <span class="n">storeaddr</span><span class="p">(</span><span class="kt">uint256</span> <span class="n">num</span><span class="p">,</span> <span class="kt">address</span> <span class="n">a</span><span class="p">)</span> <span class="k">public</span> <span class="p">{</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="n">num</span><span class="p">;</span>
+        <span class="n">addr</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span>
+        <span class="n">isTure</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="p">}</span>
     
-    function get_number() public view returns (uint256){
-        return number;
-    }
+    <span class="k">function</span> <span class="n">get_number</span><span class="p">()</span> <span class="k">public</span> <span class="k">view</span> <span class="k">returns</span> <span class="p">(</span><span class="kt">uint256</span><span class="p">){</span>
+        <span class="k">return</span> <span class="n">number</span><span class="p">;</span>
+    <span class="p">}</span>
     
-}
-</code></pre>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <p>Transaction的运行后的结果如下面的Json所示。我们可以观察到，在本例中Contract声明了三个变量但是Storage只占用了两个Slot。按照我们上面的发现，在第二个slot(Key:0x0000000000000000000000000000000000000000000000000000000000000001)保存了addr和isTrue的值。</p>
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-12-14T22:24:08+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tech Notes | HSY</title><subtitle>Researching and Thinking
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-12-16T17:48:06+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tech Notes | HSY</title><subtitle>Researching and Thinking
 </subtitle><author><name>Siyuan Han</name><email>shanaj@connect.ust.hk</email></author><entry><title type="html">[Re]怎样当好一名师长</title><link href="http://localhost:4000/working/2021/11/13/How_to_be_a_good_Division_Commander.html" rel="alternate" type="text/html" title="[Re]怎样当好一名师长" /><published>2021-11-13T10:00:00+08:00</published><updated>2021-11-13T10:00:00+08:00</updated><id>http://localhost:4000/working/2021/11/13/How_to_be_a_good_Division_Commander</id><content type="html" xml:base="http://localhost:4000/working/2021/11/13/How_to_be_a_good_Division_Commander.html">&lt;h2 id=&quot;怎样当好一名师长author林彪&quot;&gt;怎样当好一名师长(Author:林彪)&lt;/h2&gt;
 
 &lt;p&gt;一、&lt;strong&gt;要勤快&lt;/strong&gt;。不勤快的人办不好事情，不能当好军事指挥员。应该自己干的事情一定要亲自过目，亲自动手。比如，应该上去看的山头就要爬上去，应该了解的情况就要及时了解，应该检查的问题就要严格检查。不能懒，军事指挥员切忌懒，因为懒会带来危险，带来失败。比方说，一个军事指挥员，到了宿营地就进房子，搞水洗脸洗脚，搞鸡蛋煮面吃，吃饱了就睡大觉。他对住的村子有多大，在什么位置，附近有几个山头周围有几条道路，敌情怎么样，群众条件怎么样，可能发生什么情况，部队到齐了没有，哨位在什么地方，发生紧急情况时的处置预案如何，都不过问，都不知道。这样，如果半夜三更发生了情况，敌人来个突然袭击，就没有办法了。到那种时候，即使平时很勇敢的指挥员，也会束手无策，只好三十六计，跑为上计，结果，变成一个机会主义者。机会主义和打败仗，常常是因为没有思想准备，没有组织准备，工作没有做到家，懒的结果。因此，不论大小指挥员都要勤快，要不惜走路，不怕劳累，要多用脑子，要做到心到、眼到、口到、脚到、手到。事情没有做好以前，不能贪闲。贪闲就隐伏着犯错误的根子。什么事都要心中有底，“凡事预则立，不预则废”。雷打不动的干部，牛皮糖式的干部，不管有多大本事，都不是好干部。&lt;/p&gt;
@@ -143,9 +143,7 @@
 &lt;p&gt;我们使用一个简单的合约来展示Contract Storage层的逻辑，合约代码如下所示。在本例中，Storage合约保存了三个持久化uint256 变量(number, number1, and number2)，并通过stores函数给它们进行赋值。&lt;/p&gt;
 
 &lt;div class=&quot;language-solidity highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// SPDX-License-Identifier: GPL-3.0
-&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;pragma&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;solidity&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;pragma&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;solidity&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;cm&quot;&gt;/**
 * @title Storage
 * @dev Store &amp;amp; retrieve value in a variable
@@ -310,39 +308,35 @@
 
 &lt;p&gt;在下面的示例中，我们声明了三个变量，分别是number(uint256)，addr(address)，以及isTrue(bool)。我们知道，在以太坊中Address是一个长度为20 bytes的字符串，所以一个Address类型是没办法填满整个的Slot的。布尔类型在以太坊中只需要一个bit(0 or 1)就可以表示. 我们构造transaction调用函数storeaddr。函数的input为1 “0xb6186d3a3D32232BB21E87A33a4E176853a49d12”。&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-Solidity&quot;&gt;// SPDX-License-Identifier: GPL-3.0
-
-pragma solidity &amp;gt;=0.7.0 &amp;lt;0.9.0;
-
-/**
+&lt;div class=&quot;language-solidity highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// SPDX-License-Identifier: GPL-3.0
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;pragma&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;solidity&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;/**
  * @title Storage
  * @dev Store &amp;amp; retrieve value in a variable
- */
-contract Storage {
+ */&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;contract&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Storage&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 
+    &lt;span class=&quot;kt&quot;&gt;uint256&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;number&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;address&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;addr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isTrue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-    uint256 number;
-    address addr;
-    bool isTrue;
-
-
-    function stores(uint256 num) public {
-        // number1 = num + 1;
-        // number2 = num + 2;
-    }
+    &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stores&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint256&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// number1 = num + 1;
+&lt;/span&gt;        &lt;span class=&quot;c1&quot;&gt;// number2 = num + 2;
+&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
     
-    function storeaddr(uint256 num, address a) public {
-        number = num;
-        addr = a;
-        isTure = true;
-    }
+    &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;storeaddr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint256&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;address&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;number&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;addr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;isTure&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
     
-    function get_number() public view returns (uint256){
-        return number;
-    }
+    &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_number&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;view&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;returns&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint256&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;number&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
     
-}
-&lt;/code&gt;&lt;/pre&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Transaction的运行后的结果如下面的Json所示。我们可以观察到，在本例中Contract声明了三个变量但是Storage只占用了两个Slot。按照我们上面的发现，在第二个slot(Key:0x0000000000000000000000000000000000000000000000000000000000000001)保存了addr和isTrue的值。&lt;/p&gt;
 
