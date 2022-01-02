@@ -217,11 +217,11 @@ func (s *StateDB) SetState(addr common.Address, key, value common.Hash) {
 }
 ```
 
- 这样就完成了，自顶向下的Transaction修改StateDB的Workflow。。
+综上，自顶向下的Transaction修改StateDB的Workflow如下所示。
 
 - commitTransactions ->> commitTransaction ->> ApplyTransaction ->> applyTransaction ->>  ApplyMessage ->> TransactionDB ->> Call  ->> Run ->> opSstore ->> StateDB ->> StateObject ->> Key-Value-Trie
 
-![Transaction Execution Flow](../figs/02/tx_execu_flow.png)
+<!-- ![Transaction Execution Flow](../figs/02/tx_execu_flow.png) -->
 
 ## Reference
 
