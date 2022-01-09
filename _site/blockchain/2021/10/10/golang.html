@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Go语言开发Tips - Tech Notes | HSY</title>
 
 <meta name="description" content="IntroductionThis repo records the daily programming nodes of Golang.Why Golang?Golang是一种非常适合分布式系统/数据库(Distributed System/database)，区块链(Blockchain)项目开发的编程语言，因...">
-<link rel="canonical" href="http://localhost:4000/blockchain/2021/10/10/golang.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
+<link rel="canonical" href="http://www.hsyodyssey.com/blockchain/2021/10/10/golang.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -363,15 +363,15 @@
       <li>For example:</li>
     </ul>
 
-    <pre><code class="language-Go">var pd1 PaperDetails = PaperDetails{
-Title:  "testtitle",
-Topics: []string{"test topic1", "test topic2"},
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">pd1</span> <span class="n">PaperDetails</span> <span class="o">=</span> <span class="n">PaperDetails</span><span class="p">{</span>
+<span class="n">Title</span><span class="o">:</span>  <span class="s">"testtitle"</span><span class="p">,</span>
+<span class="n">Topics</span><span class="o">:</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test topic1"</span><span class="p">,</span> <span class="s">"test topic2"</span><span class="p">},</span>
 
-Authors:      []string{"test author1", "test author2"},
-Comments:     []string{"test comment1"},
-Keysentencts: map[string][]Sentence{"test topic1": {sent1, sent2}, "test topic2": {sent2, sent3}},
-}
-</code></pre>
+<span class="n">Authors</span><span class="o">:</span>      <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test author1"</span><span class="p">,</span> <span class="s">"test author2"</span><span class="p">},</span>
+<span class="n">Comments</span><span class="o">:</span>     <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test comment1"</span><span class="p">},</span>
+<span class="n">Keysentencts</span><span class="o">:</span> <span class="k">map</span><span class="p">[</span><span class="kt">string</span><span class="p">][]</span><span class="n">Sentence</span><span class="p">{</span><span class="s">"test topic1"</span><span class="o">:</span> <span class="p">{</span><span class="n">sent1</span><span class="p">,</span> <span class="n">sent2</span><span class="p">},</span> <span class="s">"test topic2"</span><span class="o">:</span> <span class="p">{</span><span class="n">sent2</span><span class="p">,</span> <span class="n">sent3</span><span class="p">}},</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
   </li>
 </ul>
 
@@ -385,22 +385,22 @@ Keysentencts: map[string][]Sentence{"test topic1": {sent1, sent2}, "test topic2"
       <li>
         <p>指针的方式, 这种方式会返回一个指向新的结构体的指针:</p>
 
-        <pre><code class="language-Golang">var s * Student
-s = new(Student)
-s.name = "test"
+        <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">s</span> <span class="o">*</span> <span class="n">Student</span>
+<span class="n">s</span> <span class="o">=</span> <span class="nb">new</span><span class="p">(</span><span class="n">Student</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">"test"</span>
 
-\\or
-var s = new (Student)
-s.name = "test"
-</code></pre>
+<span class="err">\\</span><span class="n">or</span>
+<span class="k">var</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">new</span> <span class="p">(</span><span class="n">Student</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">"test"</span>
+</code></pre></div>        </div>
       </li>
       <li>
         <p>With a struct literal, 这种方式会返回一个值变量(等于第一种方式的*s):</p>
 
-        <pre><code class="language-Golang">s := Student{
-  name: "test",
-}
-</code></pre>
+        <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">:=</span> <span class="n">Student</span><span class="p">{</span>
+  <span class="n">name</span><span class="o">:</span> <span class="s">"test"</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>        </div>
       </li>
     </ul>
   </li>

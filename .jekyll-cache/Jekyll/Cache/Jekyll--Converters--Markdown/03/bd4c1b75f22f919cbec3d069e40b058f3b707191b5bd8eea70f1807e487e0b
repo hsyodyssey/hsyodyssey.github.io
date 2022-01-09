@@ -1,4 +1,4 @@
-I"C"<h2 id="introduction">Introduction</h2>
+I"�+<h2 id="introduction">Introduction</h2>
 
 <p>This repo records the daily programming nodes of Golang.</p>
 
@@ -64,15 +64,15 @@
       <li>For example:</li>
     </ul>
 
-    <pre><code class="language-Go">var pd1 PaperDetails = PaperDetails{
-Title:  "testtitle",
-Topics: []string{"test topic1", "test topic2"},
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">pd1</span> <span class="n">PaperDetails</span> <span class="o">=</span> <span class="n">PaperDetails</span><span class="p">{</span>
+<span class="n">Title</span><span class="o">:</span>  <span class="s">"testtitle"</span><span class="p">,</span>
+<span class="n">Topics</span><span class="o">:</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test topic1"</span><span class="p">,</span> <span class="s">"test topic2"</span><span class="p">},</span>
 
-Authors:      []string{"test author1", "test author2"},
-Comments:     []string{"test comment1"},
-Keysentencts: map[string][]Sentence{"test topic1": {sent1, sent2}, "test topic2": {sent2, sent3}},
-}
-</code></pre>
+<span class="n">Authors</span><span class="o">:</span>      <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test author1"</span><span class="p">,</span> <span class="s">"test author2"</span><span class="p">},</span>
+<span class="n">Comments</span><span class="o">:</span>     <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test comment1"</span><span class="p">},</span>
+<span class="n">Keysentencts</span><span class="o">:</span> <span class="k">map</span><span class="p">[</span><span class="kt">string</span><span class="p">][]</span><span class="n">Sentence</span><span class="p">{</span><span class="s">"test topic1"</span><span class="o">:</span> <span class="p">{</span><span class="n">sent1</span><span class="p">,</span> <span class="n">sent2</span><span class="p">},</span> <span class="s">"test topic2"</span><span class="o">:</span> <span class="p">{</span><span class="n">sent2</span><span class="p">,</span> <span class="n">sent3</span><span class="p">}},</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
   </li>
 </ul>
 
@@ -86,22 +86,22 @@ Keysentencts: map[string][]Sentence{"test topic1": {sent1, sent2}, "test topic2"
       <li>
         <p>指针的方式, 这种方式会返回一个指向新的结构体的指针:</p>
 
-        <pre><code class="language-Golang">var s * Student
-s = new(Student)
-s.name = "test"
+        <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">s</span> <span class="o">*</span> <span class="n">Student</span>
+<span class="n">s</span> <span class="o">=</span> <span class="nb">new</span><span class="p">(</span><span class="n">Student</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">"test"</span>
 
-\\or
-var s = new (Student)
-s.name = "test"
-</code></pre>
+<span class="err">\\</span><span class="n">or</span>
+<span class="k">var</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">new</span> <span class="p">(</span><span class="n">Student</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">"test"</span>
+</code></pre></div>        </div>
       </li>
       <li>
         <p>With a struct literal, 这种方式会返回一个值变量(等于第一种方式的*s):</p>
 
-        <pre><code class="language-Golang">s := Student{
-  name: "test",
-}
-</code></pre>
+        <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">:=</span> <span class="n">Student</span><span class="p">{</span>
+  <span class="n">name</span><span class="o">:</span> <span class="s">"test"</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>        </div>
       </li>
     </ul>
   </li>
