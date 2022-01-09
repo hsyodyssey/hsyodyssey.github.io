@@ -129,7 +129,7 @@ comments:
   gitalk:
     clientID    : 7cb3e2b88f8c2d3eb89a
     clientSecret: 16804ee936e26c1fe758dbc71c55ab358d0dbeca
-    repository  : hsyodyssey.github.io
+    repository  : hsyodyssey/comment_gitalk_repo
     owner       : hsyodyssey
     admin: hsyodyssey
 
