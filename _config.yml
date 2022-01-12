@@ -128,7 +128,7 @@ comments:
     clientSecret: 6ed5edf2e8f2b8476b0e6bdb1bdd8c7614a85463
     repository  : comment_gitalk_repo
     owner       : hsyodyssey
-    admin: hsyodyssey  
+    admin: hsyodyssey
     
   ## Disqus
   disqus:
