@@ -66,6 +66,7 @@ paths:
   home    : # home layout url, "/" (default)
   archive : # "/archive.html" (default)
   rss     : # "/feed.xml" (default)
+  
 
 
 ## => Post
@@ -118,11 +119,7 @@ sharing:
 ## => Comments
 ##############################
 comments:
-  provider: "gitalk" # false (default), "disqus", "gitalk", "valine", "custom"
-
-  ## Disqus
-  disqus:
-    shortname: # the Disqus shortname for the site
+  provider: gitalk # false (default), "disqus", "gitalk", "valine", "custom"
 
   ## Gitalk
   # please refer to https://github.com/gitalk/gitalk for more info.
@@ -131,8 +128,11 @@ comments:
     clientSecret: 16804ee936e26c1fe758dbc71c55ab358d0dbeca
     repository  : hsyodyssey/comment_gitalk_repo
     owner       : hsyodyssey
-    admin: hsyodyssey
-
+    admin: hsyodyssey  
+    
+  ## Disqus
+  disqus:
+    shortname: # the Disqus shortname for the site
   ## Valine
   # please refer to https://valine.js.org/en/ for more info.
   valine:
