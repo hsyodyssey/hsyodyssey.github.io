@@ -119,16 +119,16 @@ sharing:
 ## => Comments
 ##############################
 comments:
-  provider: gitalk # false (default), "disqus", "gitalk", "valine", "custom"
+  provider: false # false (default), "disqus", "gitalk", "valine", "custom"
 
   ## Gitalk
   # please refer to https://github.com/gitalk/gitalk for more info.
   gitalk:
-    clientID    : 7cb3e2b88f8c2d3eb89a
-    clientSecret: 6ed5edf2e8f2b8476b0e6bdb1bdd8c7614a85463
-    repository  : comment_gitalk_repo
-    owner       : hsyodyssey
-    admin: hsyodyssey  
+    clientID    : 
+    clientSecret: 
+    repository  : 
+    owner       : 
+    admin: 
     
   ## Disqus
   disqus:
