@@ -3,7 +3,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>以太坊源码分析: Account 与Contract Storage - Tech Notes | HSY</title>
 
-<meta name="description" content="General Background在当前版本的以太坊采用了Account-based的数据管理架构。在这种架构下，Account (账户)是参与链上交易的基本角色，它承担了链上交易的发起者以及接收者的角色。目前, Account的数据结构的定义在”core/types/state_account.go”文件中(...">
+<meta name="description" content="General Background在Ethereum中，State Account (账户)是参与链上交易的基本角色。Account是Ethereum状态机模型中的基本单位，承担了链上交易的发起者以及交易接收者的角色。目前，在以太坊中，有两种类型的Account，分别是外部账户(EOA)以及合约(Contrac...">
 <link rel="canonical" href="http://www.hsyodyssey.com/blockchain/2021/10/13/ethereum-account.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-config" content="/assets/browserconfig.xml">
@@ -308,30 +308,13 @@
 <!-- end custom article top snippet -->
 <div class="article__content" itemprop="articleBody"><h2 id="general-background">General Background</h2>
 
-<p>在当前版本的以太坊采用了Account-based的数据管理架构。在这种架构下，Account (账户)是参与链上交易的基本角色，它承担了链上交易的发起者以及接收者的角色。目前, Account的数据结构的定义在”core/types/state_account.go”文件中(<del>在之前的版本中Account的代码位于core/account.go</del>)，具体的定义如下所示。</p>
+<p>在Ethereum中，State Account (账户)是参与链上交易的基本角色。Account是Ethereum状态机模型中的基本单位，承担了链上交易的发起者以及交易接收者的角色。</p>
 
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Account is the Ethereum consensus representation of accounts.</span>
-<span class="c">// These objects are stored in the main account trie.</span>
-<span class="k">type</span> <span class="n">StateAccount</span> <span class="k">struct</span> <span class="p">{</span>
-  <span class="n">Nonce</span>    <span class="kt">uint64</span>
-  <span class="n">Balance</span>  <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
-  <span class="n">Root</span>     <span class="n">common</span><span class="o">.</span><span class="n">Hash</span> <span class="c">// merkle root of the storage trie</span>
-  <span class="n">CodeHash</span> <span class="p">[]</span><span class="kt">byte</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<p>目前，在以太坊中，有两种类型的Account，分别是外部账户(EOA)以及合约(Contract)。</p>
 
-<p>具体的来说:</p>
+<p>外部账户(EOA)由用户直接控制，负责构造签名并发起交易(transaction)。Contract由用户创建，用于不可篡改的保存图灵完备的代码段，以及一些持久化的数据。我们知道，在以太坊状态机模型中，账户的状态是以Transaction为单位进行更新的，这种架构被称为transaction-based state machine。在系统执行Transaction前后的数据，称为系统的Snapshot。账户在Snapshot下中所有信息(information/data)，称为账户的状态(State)。总结的说，在以太坊中transaction可以账户从一个状态转移到另一个状态。</p>
 
-<ul>
-  <li>Nonce 表示该账户发送的交易序号。</li>
-  <li>Balance 表示该账户的余额。这里的余额指的是链上的Global Token Ether。</li>
-  <li>Root 表示当前账户的下Storage层的 Merkle Patricia Tire的Root。</li>
-  <li>CodeHash是该账户的Contract代码的哈希值。</li>
-</ul>
-
-<p>目前，在以太坊中，有两种Account的角色，外部账户(EOA)以及合约(Contract)。EOA由用户之间控制，负责构造签名并发起交易(transaction)。 Contract由用户构造，用于实现一些链上的逻辑。每个账户在某个时刻所有信息(information or data)，称为账户的状态(State)。在以太坊中，transaction是更新账户的信息的基本元。换句话说，在以太坊中transaction可以账户从一个状态转移到另一个状态。这种架构也称为transaction-based state machine。</p>
-
-<p>在实际代码中，这两种角色都是用StateAccount进行定义，并在运行时被封装在stateObject结构中。stateObject的相关代码位于core/state/state_object.go文件。我们注意到这里的stateObject是小写字母开头，说明这个结构主要用于package内部数据操作，并不对外暴露。 以太坊通过account address来管理account state。在某一时刻下的所有的account state构成了world state。以太坊通过Merkle Patricia Tree来管理这些Account state。</p>
+<p>在实际代码中，这两种Account，都被封装在stateObject结构中。stateObject的相关代码位于core/state/state_object.go文件中，隶属于package state。我们注意到这里的stateObject是小写字母开头，说明这个结构主要用于package内部数据操作，并不对外暴露。以太坊通过account address来管理account state。在某一时刻下的所有的account state构成了world state。以太坊通过Merkle Patricia Tree来管理这些Account state。</p>
 
 <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c">// stateObject represents an Ethereum account which is being modified.</span>
   <span class="c">//</span>
@@ -364,6 +347,27 @@
     <span class="n">deleted</span>   <span class="kt">bool</span>
   <span class="p">}</span>
 </code></pre></div></div>
+
+<p>同时Package State提供了，供外部Package使用的的数据结构”State Account”。State Account对应了State Object中”data Account”成员变量。具体的，State Account的数据结构的定义在”core/types/state_account.go”文件中(<del>在之前的版本中Account的代码位于core/account.go</del>)，其定义如下所示。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Account is the Ethereum consensus representation of accounts.</span>
+<span class="c">// These objects are stored in the main account trie.</span>
+<span class="k">type</span> <span class="n">StateAccount</span> <span class="k">struct</span> <span class="p">{</span>
+  <span class="n">Nonce</span>    <span class="kt">uint64</span>
+  <span class="n">Balance</span>  <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
+  <span class="n">Root</span>     <span class="n">common</span><span class="o">.</span><span class="n">Hash</span> <span class="c">// merkle root of the storage trie</span>
+  <span class="n">CodeHash</span> <span class="p">[]</span><span class="kt">byte</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>其中的包含四个变量为:</p>
+
+<ul>
+  <li>Nonce 表示该账户发送的交易序号。</li>
+  <li>Balance 表示该账户的余额。这里的余额指的是链上的Global Token Ether。</li>
+  <li>Root 表示当前账户的下Storage层的 Merkle Patricia Tire的Root。</li>
+  <li>CodeHash是该账户的Contract代码的哈希值。</li>
+</ul>
 
 <h2 id="account--private-key--public-kay--address">Account &amp; Private Key &amp; Public Kay &amp; Address</h2>
 
@@ -421,22 +425,30 @@
   <li>在ECC中的+号不是四则运算中的加法，而是定义椭圆曲线C上的新的二元运算(Point Multiplication)。他代表了过两点P和Q的直线与椭圆曲线C的交点R‘关于X轴对称的点R。因为C是关于X轴对称的所以关于X对称的点也都在椭圆曲线上。</li>
 </ul>
 
-<h2 id="account-storage-账户存储">Account Storage (账户存储)</h2>
+<h2 id="code-example">Code Example</h2>
+
+<ul>
+  <li>这部分的示例代码位于: [<a href="example/signature">example/signature</a>]中。</li>
+</ul>
+
+<h2 id="contract-storage-合约存储">Contract Storage (合约存储)</h2>
 
 <p>在数据表现层面，EOA与Contract不同的点在于，EOA并没有维护自己的Storage层以及代码(codeHash)。相比与外部账户，合约账户额外保存了一个存储层(Storage)用于存储合约代码中持久化的变量和数据结构的数据。</p>
 
 <p>Storage层的基本组成单元称为槽(Slot)。每个Slot的大小是256bits，最多保存32 bytes的数据。作为基本的存储单元，Slot类似于内存的page以及HDD中的Block，可以通过索引的方式被上层函数访问。目前，Slot的索引key的长度同样是32 bytes(256 bits)，寻址空间从0x0000000000000000000000000000000000000000000000000000000000000000 到 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF。因此，每个Contract的Storage层最多可以保存$2^{256} - 1$个Slot。合约帐户同样使用MPT，作为可验证的索引结构来管理Slot。Storage Tire的根数据被保存在StateAccount结构体中的Root变量中，它是一个32bytes长的byte数组。</p>
 
-<h3 id="account-storage-example-one">Account Storage Example One</h3>
+<h3 id="contract-storage-example-one">Contract Storage Example One</h3>
 
 <p>我们使用一个简单的合约来展示Contract Storage层的逻辑，合约代码如下所示。在本例中，Storage合约保存了三个持久化uint256 变量(number, number1, and number2)，并通过stores函数给它们进行赋值。</p>
 
 <div class="language-solidity highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// SPDX-License-Identifier: GPL-3.0
-</span><span class="k">pragma</span> <span class="n">solidity</span> <span class="o">&gt;=</span><span class="mf">0.7</span><span class="p">.</span><span class="mi">0</span> <span class="o">&lt;</span><span class="mf">0.9</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+</span>
+<span class="k">pragma</span> <span class="n">solidity</span> <span class="o">&gt;=</span><span class="mf">0.7</span><span class="p">.</span><span class="mi">0</span> <span class="o">&lt;</span><span class="mf">0.9</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+
 <span class="cm">/**
-* @title Storage
-* @dev Store &amp; retrieve value in a variable
-*/</span>
+ * @title Storage
+ * @dev Store &amp; retrieve value in a variable
+ */</span>
 <span class="k">contract</span> <span class="n">Storage</span> <span class="p">{</span>
 
     <span class="kt">uint256</span> <span class="n">number</span><span class="p">;</span>
@@ -589,7 +601,9 @@
 </span><span class="p">}</span><span class="w">
 </span></code></pre></div></div>
 
-<p>我们可以看到transaction的执行，只对位置在1和2位置的两个Slot进行了赋值。值得注意的是，在本例中，针对Slot的赋值是从1号Slot的开始，而不是0号Slot。这说明，对于固定长度的变量，保存其值的Slot的位置是在Contract初始化开始的时候就分配的。即使变量只是被声明，且没有真正的赋值，其对应的保存值的Slot已经被分配好了。而不是在第一次给变量赋值的时候，进行分配。</p>
+<p>我们可以看到，transaction的执行只对在合约的Storage中位置在1和2位置的两个Slot进行了赋值。值得注意的是，在本例中，针对Slot的赋值是从1号位置Slot的开始，而不是0号Slot。这说明，对于固定长度的变量，其值的所占用的Slot的位置在Contract初始化开始的时候就已经分配的。即使变量只是被声明没有真正的赋值，其对应的保存值的Slot已经被分配好了。而不是在第一次给变量赋值的时候，进行再对变量的Slot值进行分配。</p>
+
+<p><img src="../figs/01/remix.png" alt="Remix Debugger" /></p>
 
 <h3 id="account-storage-example-four">Account Storage Example Four</h3>
 
@@ -598,16 +612,20 @@
 <p>在下面的示例中，我们声明了三个变量，分别是number(uint256)，addr(address)，以及isTrue(bool)。我们知道，在以太坊中Address是一个长度为20 bytes的字符串，所以一个Address类型是没办法填满整个的Slot的。布尔类型在以太坊中只需要一个bit(0 or 1)就可以表示. 我们构造transaction调用函数storeaddr。函数的input为1 “0xb6186d3a3D32232BB21E87A33a4E176853a49d12”。</p>
 
 <div class="language-solidity highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// SPDX-License-Identifier: GPL-3.0
-</span><span class="k">pragma</span> <span class="n">solidity</span> <span class="o">&gt;=</span><span class="mf">0.7</span><span class="p">.</span><span class="mi">0</span> <span class="o">&lt;</span><span class="mf">0.9</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+</span>
+<span class="k">pragma</span> <span class="n">solidity</span> <span class="o">&gt;=</span><span class="mf">0.7</span><span class="p">.</span><span class="mi">0</span> <span class="o">&lt;</span><span class="mf">0.9</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+
 <span class="cm">/**
  * @title Storage
  * @dev Store &amp; retrieve value in a variable
  */</span>
 <span class="k">contract</span> <span class="n">Storage</span> <span class="p">{</span>
 
+
     <span class="kt">uint256</span> <span class="n">number</span><span class="p">;</span>
     <span class="kt">address</span> <span class="n">addr</span><span class="p">;</span>
     <span class="kt">bool</span> <span class="n">isTrue</span><span class="p">;</span>
+
 
     <span class="k">function</span> <span class="n">stores</span><span class="p">(</span><span class="kt">uint256</span> <span class="n">num</span><span class="p">)</span> <span class="k">public</span> <span class="p">{</span>
         <span class="c1">// number1 = num + 1;
@@ -644,6 +662,8 @@
 <h3 id="account-storage-example-five">Account Storage Example Five</h3>
 
 <p>对于变长数组，map结构的存储构造则更为复杂。虽然Map本身就是key-value的结构，但是在Storage 层并不直接使用map中key的值或者key的值的hash值来作为Storage的索引值。目前，使用map的key的值和当前数组所在变量声明位置对应的slot的值进行拼接，再进行keccak256哈希值作为索引。我们在下面的例子中展示了EVM是如何处理mapping这种变长的数据结构的。在下面的合约中，我们声明了几个定长的uint256类型的对象，和一个string=&gt;uint256类型的Mapping对象。</p>
+
+<!-- Todo: 变长数据结构的存储情况。 -->
 
 <div class="language-solidity highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// SPDX-License-Identifier: GPL-3.0
 </span>

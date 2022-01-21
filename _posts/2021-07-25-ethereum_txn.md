@@ -9,10 +9,10 @@ categories: Blockchain
 
 ## State-based Blockchain
 
-- State-based Blockchain System 由两部分的数据管理模块组成：World State 和 Blockchain。
+- 通常来说，State-based Blockchain System 的数据由两部分构成：World State 和 Blockchain。World State展示了区块链中所有Account和Contract在某个Block作为Latest Block时的Snapshot 数据。而对应的，此刻的Blockchain保存了从创始区块到当前区块时，所有的区块数据，包括区块中交易数据和区块头数据。
 - State Object是系统中基于K-V结构的基础数据元素。在Ethereum中，State Object是Account。
 - World State表示了System中所有State Object的最新值的一个Snapshot，。
-- Blockchain是以块为单位的数据结构，每个块中包含了若干Transaction。Blockchain 可以被视为历史交易数据的组合。
+- Blockchain是以块为单位的数据结构，每个爱上中包含了若干Transaction。Blockchain 可以被视为历史交易数据的组合。
 - Transaction是Blockchain System中与承载数据更新的载体。通过Transaction，State Object从当前状态切换到另一个状态。
 - World State的更新是以Block为单位的。
 

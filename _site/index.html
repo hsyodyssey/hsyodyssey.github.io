@@ -289,6 +289,26 @@
 
 <!-- end custom main top snippet -->
 <article itemscope itemtype="http://schema.org/WebPage"><header style="display:none;"><h1>Home</h1></header><meta itemprop="headline" content="Home"><meta itemprop="author" content="Siyuan Han"/><div class="js-article-content"><div class="layout--articles"><div class="article-list items items--divided"><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
+          <header><a href="/blockchain/2022/01/01/understand-ethereum.html"><h2 itemprop="headline" class="item__header">Understanding Ethereum(Go version)｜理解以太坊(Go 版本源码剖析)</h2></a></header>
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">Preface
+
+Background
+
+从中本聪发表比特币白皮书至今已经过了十几年的时光。在这十几年中，Blockchain这一技术概念，从最开始作为支持Bitcoin的分布式账本，也在不断的演化发展。Blockchain及其相关的技术，从专注于加密货币到如今的逐渐通用化，逐渐成为了集成了包括数据库，分布式系统，点对点网络，编译原理，静态软件分析，众包，密码学，经济学，货币金融学在内的等多个学科知识的一个全新技术领域。至今仍然是时下最热度最高的技术话题之一。
+
+目前，市面上绝大多数的Blockchain系统都已经开源，并以开源的形式持续开发中。这就为我们提供了一种的很好的学习Blockchain技术的方式: 结合文档，结合源代码的方式对State-of-the-arts的几个Bloc...</div><p><a href="/blockchain/2022/01/01/understand-ethereum.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Blockchain">Blockchain</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Ethereum">Ethereum</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Go">Go</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Jan 01, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-01-01T10:00:00+08:00">
+    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
+      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
           <header><a href="/working/2021/11/13/How_to_be_a_good_Division_Commander.html"><h2 itemprop="headline" class="item__header">[Re]怎样当好一名师长</h2></a></header>
           <div class="item__description"><div class="article__content" itemprop="description articleBody">怎样当好一名师长(Author:林彪)
 
@@ -304,11 +324,11 @@
           <header><a href="/blockchain/2021/10/13/ethereum-account.html"><h2 itemprop="headline" class="item__header">以太坊源码分析: Account 与Contract Storage</h2></a></header>
           <div class="item__description"><div class="article__content" itemprop="description articleBody">General Background
 
-在当前版本的以太坊采用了Account-based的数据管理架构。在这种架构下，Account (账户)是参与链上交易的基本角色，它承担了链上交易的发起者以及接收者的角色。目前, Account的数据结构的定义在”core/types/state_account.go”文件中(在之前的版本中Account的代码位于core/account.go)，具体的定义如下所示。
+在Ethereum中，State Account (账户)是参与链上交易的基本角色。Account是Ethereum状态机模型中的基本单位，承担了链上交易的发起者以及交易接收者的角色。
 
-// Account is the Ethereum consensus representation of accounts.
-// These objects are stored in the main account trie.
-type StateAccount str...</div><p><a href="/blockchain/2021/10/13/ethereum-account.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+目前，在以太坊中，有两种类型的Account，分别是外部账户(EOA)以及合约(Contract)。
+
+外部账户(EOA)由用户直接控制，负责构造签名并发起交易(transaction)。Contract由用户创建，用于不可篡改的保存图灵完备的代码段，以及一些持久化的数据。我们知道，在以太坊状态机模型中，账户的状态是以Transaction为单位进行更新的，这种架构被称为transaction-based state machine。在系统执行Transacti...</div><p><a href="/blockchain/2021/10/13/ethereum-account.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Blockchain">Blockchain</a>
             </li><li>
@@ -350,11 +370,9 @@ Golang是一种非常适合分布式系统/数据库(Distributed System/database
           <div class="item__description"><div class="article__content" itemprop="description articleBody">State-based Blockchain
 
 
-  State-based Blockchain System 由两部分的数据管理模块组成：World State 和 Blockchain。
+  通常来说，State-based Blockchain System 的数据由两部分构成：World State 和 Blockchain。World State展示了区块链中所有Account和Contract在某个Block作为Latest Block时的Snapshot 数据。而对应的，此刻的Blockchain保存了从创始区块到当前区块时，所有的区块数据，包括区块中交易数据和区块头数据。
   State Object是系统中基于K-V结构的基础数据元素。在Ethereum中，State Object是Account。
-  World State表示了System中所有State Object的最新值的一个Snapshot，。
-  Blockchain是以块为单位的数据结构，每个块中包含了若干Transaction。Blockchain 可以被视为历史交易数据的组合。
-  Transaction是Blockchain System中与承载数据更新的载体。通过Transaction，...</div><p><a href="/blockchain/2021/07/25/ethereum_txn.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+  World State表示了System中所有State Object的最新值的一个Snapshot，。...</div><p><a href="/blockchain/2021/07/25/ethereum_txn.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Blockchain">Blockchain</a>
             </li><li>
