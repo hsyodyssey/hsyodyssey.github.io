@@ -8,6 +8,7 @@ title: My Reading List
 ### Finance
 
 - Can Machines “Learn” Finance?, 2020, [[link]](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3624052)
+- Taming the Factor Zoo: A Test of New Factors, 2020
 
 ## Books
 
