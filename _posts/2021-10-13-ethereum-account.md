@@ -12,14 +12,14 @@ categories: Blockchain
 
 在本文中我们来探索一下以太坊中的基本元(Metadata)之一的Account。
 
-我们知道，Ethereum是基于交易的状态机模型(Transaction-based State Machine)来运行的。其中，State基于Transaction的执行(数据更新/删除/创建)，而转移到另一个State。具体的说，在个模型中，Transaction的执行会让系统的元对象(Meta Object)的值发生改变。这个元对象就是Account。State表现(represent)出来的是Account在某个时刻的包含/对应的数据的值。
+我们知道，Ethereum的运行模型是基于交易的状态机(Transaction-based State Machine)。在这个状态几模型中，通过Transaction的执行(数据更新/删除/创建)，State会转移到另一个State。从另一个角度来看，在个模型中Transaction的执行会让系统的元对象(Meta Object)的State发生改变。在以太坊中这个元对象就是Account，而State表现(represent)出来的是Account在某个时刻的包含/对应的数据的值。
 
 - Account --> Object
 - State   --> The value of the Object
 
 Account (账户)是参与链上交易的基本角色，是Ethereum状态机模型中的基本单位，承担了链上交易的发起者以及交易接收者的角色。
 
-目前，在以太坊中，有两种类型的Account，分别是外部账户(EOA)以及合约(Contract)。外部账户(EOA)由用户直接控制的账户，负责签名并发起交易(transaction)。Contract由外部账户通过通过Transaction，用于在链上保存不可篡改的保存图灵完备的代码段，以及保存一些持久化的数据。这些代码段通常使用专用语言书写(Currently Solidity)，并且提供一些对外部访问的API。Transaction可以调用这些API来读取和修改代码段中的持久化数据。对于如何编写合约，以及Ethereum如何解析和执行Transaction调用的API的，我们会在后面的文章中详细的进行解读。
+目前，在以太坊中，有两种类型的Account，分别是外部账户(EOA)以及合约(Contract)。外部账户(EOA)由用户直接控制的账户，负责签名并发起交易(transaction)。合约(Contract)由外部账户通过Transaction创建，用于在链上保存**不可篡改的**保存**图灵完备的代码段**，以及保存一些**持久化的数据**。这些代码段使用专用语言书写(Like: Solidity)，并且通常提供一些对外部访问API函数。这些函数通常用于计算以及查询或修改合约中的持久化数据。通常我们经常看到这样的描述"**一旦被记录到区块链上数据不可被修改**，或者**不可篡改的智能合约**"。现在我们知道这种描述是不准确。针对一个链上的智能合约，不可修改/篡改的地方是合约中的代码段，或说是合约中的*函数逻辑*，*代码逻辑是*不可以被修改/篡改的。而链上合约中的持久化的数据部分还是可以通过调用代码段中的函数进行数据操作的(CURD)。更详细的说法是，针对每一个交易用户只能调用一个合约中的API函数。如何一个用户只希望查询某些合约中的持久化数据，而不进行写操作的话，他不需要通过构造一个Transaction来查询数据。他可以通过直接调用本地数据中的对应的仅包含查询操作的函数代码或者请求其他节点存储的代码来操作。如果用户需要对合约中的数据进行更新，那么他就要构造一个Transaction来请求合约中相对应的函数。对于如何编写合约，以及Ethereum如何解析和执行Transaction调用的API的，Transaction的构造我们会在后面的文章中详细的进行解读。
 
 ### Account and stateObject
 
