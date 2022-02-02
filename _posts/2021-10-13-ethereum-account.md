@@ -102,17 +102,19 @@ type StateAccount struct {
 
 ### db
 
-上述的几个成员变量基本上以及覆盖了Account本身数据相关的类型。继续向下看，我们会遇到db和dbErr这两个成员变量。db这个变量保存了一个StateDB类型的指针(或者称为句柄handle)。这是为了方便调用StateDB相关的API对Account所对应的stateObject进行操作。StateDB本质上是用于管理stateObject信息的内存数据库，所有的Account数据的更新，检索都会使用StateDB提供的API。StateDB是Ethereum用于管理Account数据的内存抽象层。关于StateDB的具体实现，功能，以及如何与更底层(leveldb)进行结合的，我们会在之后的文章中进行详细描述。
+上述的几个成员变量基本覆盖了Account自身定义有关的全部成员变量。那么继续向下看，我们会遇到db和dbErr这两个成员变量。db这个变量保存了一个StateDB类型的指针(或者称为句柄handle)。这是为了方便调用StateDB相关的API对Account所对应的stateObject进行操作。StateDB本质上是Ethereum用于管理stateObject信息的而抽象出来的内存数据库，所有的Account数据的更新，检索都会使用StateDB提供的API。关于StateDB的具体实现，功能，以及如何与更底层(leveldb)进行结合的，我们会在之后的文章中进行详细描述。
 
 ### Cache
 
-//TODO
-对于剩下的成员变量，它们的主要作用是内存Cache。
-对于外部账户，由于没有代码字段，所以外部账号对应的code字段，以及四个Storage类型的字段对应的变量的值都为空(originStorage, pendingStorage, dirtyStorage, fakeStorage)。
+对于剩下的成员变量，它们的主要用于内存Cache。tire用于保存Contract中的持久化存储的数据，code用于缓存contract中的代码段到内存中，它是一个byte数组。剩下的四个Storage字段主要在执行Transaction的时候缓存Contract合约修改的持久化数据。对于外部账户，由于没有代码字段，所以对应stateObject对象中的code字段，以及四个Storage类型的字段对应的变量的值都为空(originStorage, pendingStorage, dirtyStorage, fakeStorage)。关于Contract的Storage层的详细信息，我们会在后面部分进行详细的描述。
 
 ## 深入Account
 
 ### Private Key & Public Kay & Address
+
+我们经常会在各种科技网站，自媒体上听到这样的说法，"在区块链上保存的Cryptocurrency/Token除了你自己，不存在一个中心化的第三方可以不经过你的允许转走你的财富"。这个说法基本是正确的。对于链级别定义Crypto，比如Ether，Bitcoin，BNB(Only in BSC)，用户账户里的Crypto是没办法被第三方偷走的。这是因为，对链级别上的所有数据的修改都要经过用户私钥(Private Key)签名的Transaction。只要用户保管好自己账户的私钥(Private Key)就没有人可以转走你链上的财富。
+
+我们说上述说法是基本正确，而不是完全正确的原因有两个。首先，用户的链上数据安全是基于当前Ethereum使用的密码学工具足够保证：不存在第三方可以在**有限的时间**内在**不知道用户私钥的前提**下获取到用户的私钥信息来伪造签名交易。当然这个安全保证前提是当今Ethereum使用的密码学工具的强度足够大，没有计算机可以在有限的时间内hack出用户的私钥信息。在量子计算机出现之前，目前Ethereum和其他Blockchain使用的密码学工具的强度都是足够安全的。这也是为什么很多新的区块链项目在研究抗量子计算机密码体系的原因。第二点是，当今很多的所谓的Crypto/Token并不是链级别的数据，而是在链上合约中存储的数据，比如ERC-20 Token和NFT对应的ERC-721的Token。由于这部分的Token都是基于合约代码生成和维护的，所以这部分Token的安全同样的也依赖于合约本身的安全，比如有没有后门漏洞。如果合约本身的代码是有问题的，比如因为代码编写问题合约隐藏了给第三方任意提取其他账户下Token的漏洞，那么即使用户的私钥信息没有泄漏，合约中的Token仍然可以被第三方获取到。由于合约的代码段在链上是不可修改的。所以，有很多研究人员，技术团队在进行合约审计方面的工作，来保证上传的合约代码是安全的。
 
 下面我们简单讲述，一个账户的私钥和地址是如何产生的。
 
