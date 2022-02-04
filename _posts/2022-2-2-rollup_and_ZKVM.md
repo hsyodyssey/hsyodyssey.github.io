@@ -1,8 +1,8 @@
 ---
 layout: article
-title:  "Rollup以及通用ZK-VM/EVM的笔记"
+title:  "Rollup/zk-Rollup以及zkVM/zkEVM"
 date:   2022-2-2 10:00:00 +0800
-tags: Blockchain Ethereum Go
+tags: Blockchain Ethereum ZKP Layer-2 Rollup zk-Rollup
 categories: Blockchain
 ---
 
