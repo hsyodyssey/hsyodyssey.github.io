@@ -101,8 +101,8 @@ ZK-Rollup核心是利用了Zero-Knowledge Proof的技术来实现rollup。ZKP里
 
 ## Related Papers
 
-- Zexe: Enabling Decentralized Private Computation
-- DIZK: A Distributed Zero Knowledge Proof System, [[link]](https://www.usenix.org/conference/usenixsecurity18/presentation/wu)
+- Zexe: Enabling Decentralized Private Computation, [[Paper link]](https://eprint.iacr.org/2018/962.pdf)
+- DIZK: A Distributed Zero Knowledge Proof System, [[Paper link]](https://www.usenix.org/conference/usenixsecurity18/presentation/wu)
 
 ## Reference
 
