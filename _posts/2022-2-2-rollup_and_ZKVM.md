@@ -34,7 +34,7 @@ ZK-Rollup核心是利用了Zero-Knowledge Proof的技术来实现rollup。ZKP里
 
 但是正因为ZKP的一些特性，使得ZK-Rollup相比于Optimism-Rollup，在开发上的并没有进行的那么顺利。
 
-我们知道ZK-SNARKs的计算的基础来自于:*将一个计算电路(Circuit)，转化为R1CS的形式*，继而转化为QAP问题，最终生成零知识的Witness(Proof)。如果我们想生成一个Problem/Computation/Function的ZK-SNARKs的Witness(Proof)，那么首先我们需要要把这个问题转化为一个Circuit的形式。或者说用Circuit的语言，用R1CS的形式来描述原计算问题。对于简单的计算问题来说，比如加减计算，解方程组，将问题转化为电路的形式并不是特别的困难。但是对于Ethereum上各种支持图灵完备的智能合约的function来说这个问题就变得非常的棘手。主要因为：
+我们知道ZK-SNARKs的计算的基础来自于:*将一个计算电路(Circuit)，转化为R1CS的形式*，继而转化为QAP问题，最终将问题的Witness生成零知识的Proof。如果我们想生成一个Problem/Computation/Function的ZK-SNARKs的Witness/Proof，那么首先我们需要要把这个问题转化为一个Circuit的形式。或者说用Circuit的语言，用R1CS的形式来描述原计算问题。对于简单的计算问题来说，比如加减计算，解方程组，将问题转化为电路的形式并不是特别的困难。但是对于Ethereum上各种支持图灵完备的智能合约的function来说这个问题就变得非常的棘手。主要因为：
 
 - 转化生成的电路是静态的，虽然电路中有可以复用的部分(Garget)，但是每个Problem/Computation/Function都要构造新的电路。
 - 对于通用计算问题，构造出来的电路需要的gate数量可能是惊人的高。这意味着ZK-Rollup可能需要非常长的时间来生成Proof。
@@ -74,10 +74,15 @@ ZK-Rollup核心是利用了Zero-Knowledge Proof的技术来实现rollup。ZKP里
     - 专用硬件加速Proof生成
 - **Zksync**
   - General
+    - 专用合约编程语言: [Zinc](https://github.com/matter-labs/zinc)
+      - 语法很像Rust
+      - 没有写自己编译器，使用的LLVM作为编译的前端和后端。
     - SyncVM
     - 专用硬件加速Proof生成(FPGA)
+    - Proof System: [PLONK](https://eprint.iacr.org/2019/953)
   - Con't
     - 并不支持所有EVM opcodes
+    - 支持部分的L1上的Solidity的合约直接使用，但是如果合约中涉及到SHA256 and Keccak256会被编译器直接修改会其他电路友好的哈希函数。
 
 ### 一些思考
 
@@ -107,3 +112,4 @@ ZK-Rollup核心是利用了Zero-Knowledge Proof的技术来实现rollup。ZKP里
 ## Reference
 
 - EIP-1559: Fee market change for ETH 1.0 chain, [[link]](https://eips.ethereum.org/EIPS/eip-1559)
+- gnark zk-SNARK library (go), [[Codebase]](https://github.com/ConsenSys/gnark)
