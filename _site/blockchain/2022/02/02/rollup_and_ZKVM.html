@@ -1,11 +1,10 @@
 <!DOCTYPE html><html lang="en">
   <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Home - Tech Notes | HSY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Rollup/zk-Rollup以及zkVM/zkEVM - Tech Notes | HSY</title>
 
-<meta name="description" content="Researching and Thinking
-">
-<link rel="canonical" href="http://localhost:4000/"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="自从EIP-1559生效后，由于币价的升高，和基础Gas Price的约束，Ethereum Mainnet上的单笔交易费用已经高到了离谱的程度。在上个月的一次实验中，我尝试了一把在Layer-1上调用一次古早的合约，大概花了100美刀左右的交易费。就像社区内经常听到的抱怨声那样，Ethereum  Mainne...">
+<link rel="canonical" href="http://localhost:4000/blockchain/2022/02/02/rollup_and_ZKVM.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -264,7 +263,7 @@
 </head>
   <body>
     <div class="root" data-is-touch="false">
-      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport cell cell--auto">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
 
       <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
       <div class="header__title">
@@ -283,18 +282,17 @@
   </header>
 </div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
 
-              <div class="col-aside d-print-none js-col-aside"></div>
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
 
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/WebPage"><header style="display:none;"><h1>Home</h1></header><meta itemprop="headline" content="Home"><meta itemprop="author" content="Siyuan Han"/><div class="js-article-content"><div class="layout--articles"><div class="article-list items items--divided"><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/blockchain/2022/02/02/rollup_and_ZKVM.html"><h2 itemprop="headline" class="item__header">Rollup/zk-Rollup以及zkVM/zkEVM</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">自从EIP-1559生效后，由于币价的升高，和基础Gas Price的约束，Ethereum Mainnet上的单笔交易费用已经高到了离谱的程度。在上个月的一次实验中，我尝试了一把在Layer-1上调用一次古早的合约，大概花了100美刀左右的交易费。就像社区内经常听到的抱怨声那样，Ethereum  Mainnet已经成为了普通用户用不起的贵族链。
-
-显然，目前天价的交易费以及有限的Throughput已经成为了限制Ethereum继续发展的两大难题。幸运的是，rollup技术的发展给社区展现了一种似乎可以一招解决两大难题的绝世武学。
-
-简单的来说，顾名思义，rollup，就是把一堆的transaction rollup到一个新的transaction。然后，通过某种神奇的技术，使得E...</div><p><a href="/blockchain/2022/02/02/rollup_and_ZKVM.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>Rollup/zk-Rollup以及zkVM/zkEVM</h1></header><span class="split-space">&nbsp;</span>
+          <a class="edit-on-github"
+            title="Edit on Github"
+            href="https://github.com/hsyodyssey/hsyodyssey.github.io/tree/main/_posts/2022-2-2-rollup_and_ZKVM.md">
+            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="Rollup/zk-Rollup以及zkVM/zkEVM"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Blockchain">Blockchain</a>
             </li><li>
@@ -314,116 +312,217 @@
                 href="/archive.html?tag=zk-Rollup">zk-Rollup</a>
             </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Feb 02, 2022</span>
             </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-02-02T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,ZKP,Layer-2,Rollup,zk-Rollup"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/blockchain/2022/01/01/understand-ethereum.html"><h2 itemprop="headline" class="item__header">Understanding Ethereum(Go version)｜理解以太坊(Go 版本源码剖析)</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">Preface
+    <meta itemprop="keywords" content="Blockchain,Ethereum,ZKP,Layer-2,Rollup,zk-Rollup"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
-Background
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><p>自从<a href="https://eips.ethereum.org/EIPS/eip-1559">EIP-1559</a>生效后，由于币价的升高，和基础Gas Price的约束，Ethereum Mainnet上的单笔交易费用已经高到了离谱的程度。在上个月的一次实验中，我尝试了一把在Layer-1上调用一次古早的合约，大概花了100美刀左右的交易费。就像社区内经常听到的抱怨声那样，Ethereum  Mainnet已经成为了普通用户用不起的贵族链。</p>
 
-从中本聪发表比特币白皮书至今已经过了十几年的时光。在这十几年中，Blockchain这一技术概念，从最开始作为支持Bitcoin的分布式账本，也在不断的演化发展。Blockchain及其相关的技术，从专注于加密货币到如今的逐渐通用化，逐渐成为了集成了包括数据库，分布式系统，点对点网络，编译原理，静态软件分析，众包，密码学，经济学，货币金融学在内的等多个学科知识的一个全新技术领域。至今仍然是时下最热度最高的技术话题之一。
+<p>显然，目前<strong>天价的交易费</strong>以及<strong>有限的Throughput</strong>已经成为了限制Ethereum继续发展的两大难题。幸运的是，<strong>rollup</strong>技术的发展给社区展现了一种似乎可以一招解决两大难题的绝世武学。</p>
 
-目前，市面上绝大多数的Blockchain系统都已经开源，并以开源的形式持续开发中。这就为我们提供了一种的很好的学习Blockchain技术的方式: 结合文档，结合源代码的方式对State-of-the-arts的几个Bloc...</div><p><a href="/blockchain/2022/01/01/understand-ethereum.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Blockchain">Blockchain</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Ethereum">Ethereum</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Go">Go</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Jan 01, 2022</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-01-01T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/working/2021/11/13/How_to_be_a_good_Division_Commander.html"><h2 itemprop="headline" class="item__header">[Re]怎样当好一名师长</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">怎样当好一名师长(Author:林彪)
+<p>简单的来说，顾名思义，rollup，就是把一堆的transaction rollup到一个新的transaction。然后，通过某种神奇的技术，使得Ethereum Mainnet只需要验证这个新生成的transaction，就可以保证被Rollup之前的若干的Transaction的确定性，正确性，完整性。举个简单的例子，我们想象一个学校内交学费的场景。过去，每个学生(i.e. Account)都需要通过学校交费系统(i.e. Ethereum Mainnet)单独的将自己的学费转账(Transfer)给学校教务处。假如，现在计算机系有1000个学生，那么系统就要处理1000笔转账的交易(Transaction)。现在，系里新来一位叫做<em>Rollup</em>的教授。他在学生中很有号召力。基于他的个人魅力(神奇的魔法)，<strong>私下里</strong>让所有的的学生把钱通过<strong>某种方式</strong>先转给他。当<em>Prof.Rollup</em>收集到系里所有学生的学费之后，然后他通过构造一个transaction把所有的学费交给教务处。这个例子大概就是一个Rollup场景的简单抽象。我们把学校的交费系统看作为Ethereum Mainnet 或者说是Layer-1，那么私下里收集学生的学费就是所谓的<strong>Layer-2</strong>进行的了。通常，我们把Layer-1上的交易称为on-chain transaction，把在Layer-2进行上的交易称为off-chain transaction。</p>
 
-一、要勤快
+<p>Rollup的好处是显而易见的，假如每次把<strong>N</strong>个transaction rollup成一个，那么对于Mainnet来说，处理一条交易，实际效果等同于处理了之前系统中的<strong>N</strong>个交易。同时，系统实际吞吐量的Upper Bound也实际上上市到了<strong>N*MAX_TPS</strong>的水平。同时，对于用户来说，同样一条交易Mainnet Transaction Fee实际上是被<strong>N</strong>个用户同时负担的。那么理论上，用户需要的实际交易费用也只有之前的<strong>1/N+c</strong>。这里的<strong>c</strong>代表rollup服务提供商收取的交易费，这个值是远远小于layer-1上交易所需要的交易费用的。</p>
 
-不勤快的人办不好事情，不能当好军事指挥员。应该自己干的事情一定要亲自过目，亲自动手。比如，应该上去看的山头就要爬上去，应该了解的情况就要及时了解，应该检查的问题就要严格检查。不能懒，军事指挥员切忌懒，因为懒会带来危险，带来失败。比方说，一个军事指挥员，到了宿营地就进房子，搞水洗脸洗脚，搞鸡蛋煮面吃，吃饱了就睡大觉。他对住的村子有多大，在什么位置，附近有几个山头周围有几条道路，敌情怎么样，群众条件怎么样，可能发生什么情况，部队到齐了没有，哨位在什么地方，发生紧急情况时的处置预案如何，都不过问，都不知道。这样，如果半夜三更发生了情况，敌人来个突然袭击，就没有办法了。到那种时候，即使平时很勇敢的指挥员，也会束手无策，只好三十六计，跑为上...</div><p><a href="/working/2021/11/13/How_to_be_a_good_Division_Commander.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Working">Working</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Nov 13, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-11-13T10:00:00+08:00">
-    <meta itemprop="keywords" content="Working"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/blockchain/2021/10/13/ethereum-account.html"><h2 itemprop="headline" class="item__header">以太坊源码分析: 账户与合约(Account and Contract)</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">Account数据结构分析
+<p>Rollup看上去完美的解决了Ethereum面临的两大难题，通过分层的方式给Ethereum进行了扩容。但是，在实现layer-2 rollup时，还是有很多的细节有待商榷。比如:</p>
 
-Background
+<ul>
+  <li>怎么保证<em>Prof.Rollup</em>一定会把学费交给教务处呢？ (Layer-2 交易的安全性)</li>
+  <li>怎么保证<em>Prof.Rollup</em>会把全部的学费都交给教务处呢？(Layer-2 交易的完整性)</li>
+  <li><em>Prof.Rollup</em>什么时候才会把学费打给教务处呢？(Layer-2 到Layer-1 跨链交易的时效性问题)</li>
+  <li>等等..</li>
+</ul>
 
-在本文中我们来探索一下以太坊中的基本元(Metadata)之一的Account。
+<p>就像华山派的剑宗和气宗分家一样，目前，在如何实现Rollup上，主要分为了两大流派，分别是<strong>Optimism-Rollup</strong>，和<strong>ZK-Rollup</strong>。两种路线各有所长，又各有不足。</p>
 
-我们知道，Ethereum的运行模型是基于交易的状态机(Transaction-based State Machine)。在这个状态几模型中，通过Transaction的执行(数据更新/删除/创建)，State会转移到另一个State。从另一个角度来看，在个模型中Transaction的执行会让系统的元对象(Meta Object)的State发生改变。在以太坊中这个元对象就是Account，而State表现(represent)出来的是Account在某个时刻的包含/对应的数据的值。
+<h2 id="optimism-rollup">Optimism-Rollup</h2>
 
+<ul>
+  <li>Arbitrum
+    <ul>
+      <li>乐观模式，Layer-2完全兼容EVM，通过设置挑战时间来保证跨链交易，目前是one week。</li>
+    </ul>
+  </li>
+</ul>
 
-  Account –&gt; Object
-  State...</div><p><a href="/blockchain/2021/10/13/ethereum-account.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Blockchain">Blockchain</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Ethereum">Ethereum</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Go">Go</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Oct 13, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-10-13T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/blockchain/2021/10/10/golang.html"><h2 itemprop="headline" class="item__header">Go语言开发Tips</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">Introduction
+<h2 id="zk-rollup">ZK-Rollup</h2>
 
-This repo records the daily programming nodes of Golang.
+<p>ZK-Rollup核心是利用了Zero-Knowledge Proof的技术来实现rollup。ZKP里面的细节比较多，在这里我们不展开描述。其中最重要的核心点是ZK-Rollup主要利用了ZK-SNARKs中的可验证性的正确性保障，以及Verification Time相对较快的特性，来保证layer-1上的Miner可以很快的验证大量交易的准确性。</p>
 
-Why Golang?
+<p>但是正因为ZKP的一些特性，使得ZK-Rollup相比于Optimism-Rollup，在开发上的并没有进行的那么顺利。</p>
 
-Golang是一种非常适合分布式系统/数据库(Distributed System/database)，区块链(Blockchain)项目开发的编程语言，因为:
+<p>我们知道ZK-SNARKs的计算的基础来自于:<em>将一个计算电路(Circuit)，转化为R1CS的形式</em>，继而转化为QAP问题，最终将问题的Witness生成零知识的Proof。如果我们想生成一个Problem/Computation/Function的ZK-SNARKs的Witness/Proof，那么首先我们需要要把这个问题转化为一个Circuit的形式。或者说用Circuit的语言，用R1CS的形式来描述原计算问题。对于简单的计算问题来说，比如加减计算，解方程组，将问题转化为电路的形式并不是特别的困难。但是对于Ethereum上各种支持图灵完备的智能合约的function来说这个问题就变得非常的棘手。主要因为：</p>
 
+<ul>
+  <li>转化生成的电路是静态的，虽然电路中有可以复用的部分(Garget)，但是每个Problem/Computation/Function都要构造新的电路。</li>
+  <li>对于通用计算问题，构造出来的电路需要的gate数量可能是惊人的高。这意味着ZK-Rollup可能需要非常长的时间来生成Proof。</li>
+  <li>对于目前EVM架构下的某些计算问题，生成其电路是非常困难的。</li>
+</ul>
 
-  语法简单。它学习曲线平滑。有其他高级语言编程经验的开发人员，可以快速上手。
-  高并发基因。它提供了强大简洁易用稳定的标准库，对高并发，分布式程序有更加灵活简洁全面的标准库支持。不需要依赖第三方库就可以快速构建后端/网络/高并发应用。
-  跨平台。它支持跨系统交叉编译。MacOS/Win 也可以编译Linux下可以运行的程序，不需要担心环境依赖的问题。...</div><p><a href="/blockchain/2021/10/10/golang.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Blockchain">Blockchain</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Ethereum">Ethereum</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Go">Go</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Oct 10, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-10-10T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/blockchain/2021/07/25/ethereum_txn.html"><h2 itemprop="headline" class="item__header">一个Ethereum Transaction的生老病死</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">State-based Blockchain
+<p>前两个问题属于General的ZK-SNARKs应用都会遇到的问题，目前已经有一些的研究人员/公司正在尝试解决这个问题。比如AleoHQ的创始人Howard Wu提出的<a href="https://www.usenix.org/conference/usenixsecurity18/presentation/wu">DIZK</a>通过分布式的Cluster来并发计算Proof，以及Scroll的创始人<a href="https://twitter.com/yezhang1998">Zhang Ye</a>，提出的<a href="https://www.microsoft.com/en-us/research/publication/pipezk-accelerating-zero-knowledge-proof-with-a-pipelined-architecture/">PipeZK</a>通过ASIC来加速ZK计算。</p>
 
+<p>对于第三个问题，属于Ethereum中的专有的问题，也是目前zk-Rollup实现中最难，最需要攻克的问题。我们知道在Ethereum中，一条调用合约Function的Transaction的执行是基于/通过EVM的来执行的。EVM会将Transaction中的函数调用，基于合约代码，转换成opcodes的形式，保存在Stack中逐条执行。这个过程类似于编译过程中的IR代码生成，或者高级语言到汇编语言的过程。在执行这些opcodes时，本质上是在执行geth中对应的库函数，部分细节可以参考之前的<a href="http://www.hsyodyssey.com/blockchain/2021/07/25/ethereum_txn.html">blog</a>。那么如果我们想把一个Transaction的合约调用转换成一个电路的话，本质上我们就要基于这个函数调用过程中执行过的opcodes来生成电路。目前的问题是，EVM在设计的时候并没有考虑到将来会被ZK-SNARKs这一问题，所以在它包含的140个opcode中有些是难以构造电路的。</p>
 
-  通常来说，State-based Blockchain System 的数据由两部分构成：World State 和 Blockchain。World State展示了区块链中所有Account和Contract在某个Block作为Latest Block时的Snapshot 数据。而对应的，此刻的Blockchain保存了从创始区块到当前区块时，所有的区块数据，包括区块中交易数据和区块头数据。
-  State Object是系统中基于K-V结构的基础数据元素。在Ethereum中，State Object是Account。
-  World State表示了System中所有State Object的最新值的一个Snapshot，。...</div><p><a href="/blockchain/2021/07/25/ethereum_txn.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Blockchain">Blockchain</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Ethereum">Ethereum</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Go">Go</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Jul 25, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-07-25T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
-      </article></div>
-</div><div class="layout--home"></div>
-<script>/*(function () {
+<p>结果就是，在目前的ZK-Rollup的解决方案中，大部分<strong>仅支持基础的转账操作</strong>，而<strong>不能支持</strong>通用的图灵完备的计算。也就是说，目前的ZK-Rollup的解决方案都是不完整的，不能完整的发挥Ethereum图灵完备合约的特性，Layer-2又回到了仅支持Token转账的时代。</p>
 
-})();*/
+<p>为了解决这个问题，使得Layer-2能支持像现在的Layer-1一样的功能，目前的技术主要在朝向两个方向发展，1. 构建ZK-SNARKs兼容的zkEVM，2.提出新的VM来兼容ZK-SNARKs，并想办法与Ethereum兼容。</p>
+
+<h3 id="构建兼容evm的zkevm">构建兼容EVM的zkEVM</h3>
+
+<p>这种方案好处在于，开发人员可以继续使用solidity来构建智能合约。如何构造电路，完全交给底层的ZK-EVM来完成。ZK-EVM和现有的EVM是完全兼容的，现有的Ethereum Contract都可以直接移植到Layer-2上来使用。这种方案对现有的以太坊生态圈非常的友好，社区的合约开发人员在开发时，不需要学习什么额外的新知识，零门槛上手。</p>
+
+<p>这种方案的难点在于如何把现有的EVM, OPcode抽象成电路。目前正在研究这个路线的有下面两个团队，Scroll和Polygon Hermez。</p>
+
+<ul>
+  <li>Scroll
+    <ul>
+      <li>通用zkEVM</li>
+    </ul>
+  </li>
+  <li><strong><a href="https://docs.hermez.io/#start-here-for-hermez-10-documentation">Polygon Hermez</a></strong>
+    <ul>
+      <li>General
+        <ul>
+          <li>Hermez 1.0: Support Ethereum Token transfer.</li>
+          <li>Hermez 2.0: Recreating all the EVM opcodes (Seem they have the same goal with Scroll).</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="提出新的vm编程语言">提出新的VM/编程语言</h3>
+
+<p>这种方案完全甩开了EVM的包袱，重新设计对ZK友好的VM以及对应的Programming Language。由于没有了包袱，所以这种方案开发起来比较快，目前进展最快的应该是StareWare团队开发的Cairo语言。</p>
+
+<p>但是基于这种解决方案Zk-Rollup，不能在Layer-2上直接使用Layer-1上已经编写好的Solidity合约。需要合约开发人员重新学习一门新的语言来重新编写合约。</p>
+
+<ul>
+  <li><strong>StareWare</strong>
+    <ul>
+      <li>General
+        <ul>
+          <li>专用语言: <a href="https://cairo-lang.org/docs/">Cairo</a>
+            <ul>
+              <li>StarkNet uses the Cairo programing language both for infrastructure and for writing StarkNet contracts.</li>
+            </ul>
+          </li>
+          <li>专用硬件加速Proof生成</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Zksync</strong>
+    <ul>
+      <li>General
+        <ul>
+          <li>专用合约编程语言: <a href="https://github.com/matter-labs/zinc">Zinc</a>
+            <ul>
+              <li>语法很像Rust</li>
+              <li>没有写自己编译器，使用的LLVM作为编译的前端和后端。</li>
+            </ul>
+          </li>
+          <li>SyncVM</li>
+          <li>专用硬件加速Proof生成(FPGA)</li>
+          <li>Proof System: <a href="https://eprint.iacr.org/2019/953">PLONK</a></li>
+        </ul>
+      </li>
+      <li>Con’t
+        <ul>
+          <li>并不支持所有EVM opcodes</li>
+          <li>支持部分的L1上的Solidity的合约直接使用，但是如果合约中涉及到SHA256 and Keccak256会被编译器直接修改会其他电路友好的哈希函数。</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="一些思考">一些思考</h3>
+
+<p>从我个人的角度来说，提出新的VM/编程语言的方案不能算非常友好的。首先以太坊社区在Solidity生态建设方面已经做的非常的完善，有大量的已经审计过的合约可供开发人员参考，有大量的生产工具可供使用。对于智能合约来说，由于其代码部分不可修改的特性，合约安全是至关重要的。重新构造一个新的编程语言环境下的合约社区是非常困难的。第二，现在需要学习一门新语言的成本太高了，尤其是学习相比C++/Java/Python更加小众的智能合约开发语言。新的编程语言，为了不和现有的开发语言完全一致而设计的新的语法，语法糖，很容易让开发人员头大。在社区还不够成熟之前，很难吸引到足够多有能力的开发人员。</p>
+
+<p>所以我更看好类似Scroll/Polygon Hermez这种Layer-2项目的发展。</p>
+
+<h3 id="其他zk-related-project">其他ZK-Related Project</h3>
+
+<p>在阅读资料时发现的一个项目AleoHQ，看上去是一个原生支持ZKP的图灵完备的新的公链项目，由Berkeley的团队开发。Founder Howard Wu实力很强，是最早的Libsnarks的开发者之一。具体的细节我还在了解之中。</p>
+
+<ul>
+  <li><strong><a href="https://github.com/AleoHQ">AleoHQ</a></strong>, Developed by Howard Wu (UC Berkeley)
+    <ul>
+      <li>General
+        <ul>
+          <li>Aleo is the first decentralized, open-source platform to enable both private and programmable applications.</li>
+          <li>Strong privacy guarantees.</li>
+          <li>专用语言: <a href="https://github.com/AleoHQ/leo">Leo</a>
+            <ul>
+              <li>Leo converts a developer’s high-level code into zero knowledge circuits.</li>
+            </ul>
+          </li>
+          <li>snarkOS:
+            <ul>
+              <li>Aleo runs on a decentralized operating system for private applications called snarkOS. (<em>HAN:Seems like zkGeth?</em>)</li>
+            </ul>
+          </li>
+          <li>Core Part: ZEXE (Zero Knowledge EXEcution)</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="related-papers">Related Papers</h2>
+
+<ul>
+  <li>Zexe: Enabling Decentralized Private Computation, <a href="https://eprint.iacr.org/2018/962.pdf">[Paper link]</a></li>
+  <li>DIZK: A Distributed Zero Knowledge Proof System, <a href="https://www.usenix.org/conference/usenixsecurity18/presentation/wu">[Paper link]</a></li>
+</ul>
+
+<h2 id="reference">Reference</h2>
+
+<ul>
+  <li>EIP-1559: Fee market change for ETH 1.0 chain, <a href="https://eips.ethereum.org/EIPS/eip-1559">[link]</a></li>
+  <li>gnark zk-SNARK library (go), <a href="https://github.com/ConsenSys/gnark">[Codebase]</a></li>
+</ul>
+</div><section class="article__sharing d-print-none"></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2022-02-02T10:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/blockchain/2022/01/01/understand-ethereum.html">Understanding Ethereum(Go version)｜理解以太坊(Go 版本源码剖析)</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
 </script>
-
-
-
 </div><section class="page__comments d-print-none"></section></article><!-- start custom main bottom snippet -->
 
 <!-- end custom main bottom snippet -->
@@ -985,6 +1084,68 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
 /*(function () {
 
 })();*/
+</script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
 </script>
     </div>
     <script>(function () {

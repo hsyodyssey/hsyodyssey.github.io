@@ -355,7 +355,7 @@ contract Storage {
 
 我们可以看到，transaction的执行只对在合约的Storage中位置在1和2位置的两个Slot进行了赋值。值得注意的是，在本例中，针对Slot的赋值是从1号位置Slot的开始，而不是0号Slot。这说明，对于固定长度的变量，其值的所占用的Slot的位置在Contract初始化开始的时候就已经分配的。即使变量只是被声明没有真正的赋值，其对应的保存值的Slot已经被分配好了。而不是在第一次给变量赋值的时候，进行再对变量的Slot值进行分配。
 
-![Remix Debugger](../figs/01/remix.png)
+![Remix Debugger](../../../../assets/figs/01/remix.png)
 
 ### Account Storage Example Four
 
