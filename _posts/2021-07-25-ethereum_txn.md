@@ -7,14 +7,109 @@ categories: Blockchain
 ---
 
 
-## State-based Blockchain
+## 概述
 
-- 通常来说，State-based Blockchain System 的数据由两部分构成：World State 和 Blockchain。World State展示了区块链中所有Account和Contract在某个Block作为Latest Block时的Snapshot 数据。而对应的，此刻的Blockchain保存了从创始区块到当前区块时，所有的区块数据，包括区块中交易数据和区块头数据。
-- State Object是系统中基于K-V结构的基础数据元素。在Ethereum中，State Object是Account。
-- World State表示了System中所有State Object的最新值的一个Snapshot，。
-- Blockchain是以块为单位的数据结构，每个爱上中包含了若干Transaction。Blockchain 可以被视为历史交易数据的组合。
-- Transaction是Blockchain System中与承载数据更新的载体。通过Transaction，State Object从当前状态切换到另一个状态。
-- World State的更新是以Block为单位的。
+Transaction是Ethereum执行数据操作的媒介。它主要起到下面的几个作用:
+
+1. 在主网络上的Account之间进行Native Token的转账。
+2. 创建新的Contract。
+3. 调用Contract中会修改Contract持久化数据或者修改其他Account/Contract数据的函数。
+
+这里我们对Transaction功能性的细节再进行额外的补充说明。首先，Transaction只能创建Contract，而不能用于创建外部账户(EOA)。其次，关于Transaction的第三个作用我们使用了很长的定语进行说明，这里是为了强调，如果调用的Contract函数只进行了查询的操作，是不需要构造依赖Transaction的。总结下来，所有参与Account/Contract数据修改的操作都需要通过Transaction来进行。第三，Transaction只能由外部账户(EOA)构建，Contract是没办法构交易的。
+
+## LegacyTx & AccessListTX & DynamicFeeTx
+
+下面我们根据源代码中的定义来了解一下Transaction具体的数据结构的定义，了解其包含的相关变量。
+
+```go
+type Transaction struct {
+ inner TxData    // Consensus contents of a transaction
+ time  time.Time // Time first seen locally (spam avoidance)
+
+ // caches
+ hash atomic.Value
+ size atomic.Value
+ from atomic.Value
+}
+```
+
+```go
+type TxData interface {
+ txType() byte // returns the type ID
+ copy() TxData // creates a deep copy and initializes all fields
+
+ chainID() *big.Int
+ accessList() AccessList
+ data() []byte
+ gas() uint64
+ gasPrice() *big.Int
+ gasTipCap() *big.Int
+ gasFeeCap() *big.Int
+ value() *big.Int
+ nonce() uint64
+ to() *common.Address
+
+ rawSignatureValues() (v, r, s *big.Int)
+ setSignatureValues(chainID, v, r, s *big.Int)
+}
+```
+
+这里注意，在目前版本的geth中(1.10.*)，根据[EIP-2718](https://eips.ethereum.org/EIPS/eip-2718)的设计，原来的TxData现在被声明成了一个interface，而不是定义了具体的结构。这样的设计好处在于，后续版本的更新中可以对Transaction类型进行更加灵活的修改。目前，在Ethereum中定义了三种类型的Transaction来实现TxData这个接口。按照时间上的定义顺序来说，这三种类型的Transaction分别是，LegacyT，AccessListTx，TxDynamicFeeTx。LegacyTx顾名思义，是原始的Ethereum的Transaction设计，目前市面上大部分早年关于Ethereum Transaction结构的文档实际上都是在描述LegacyTx的结构。而AccessListTX是基于EIP-2930(Berlin分叉)的Transaction。DynamicFeeTx是[EIP-1559](https://eips.ethereum.org/EIPS/eip-1559)(伦敦分叉)生效之后的默认的Transaction。
+
+(PS:目前Ethereum的黄皮书只更新到了Berlin分叉的内容，还没有添加London分叉的更新, 2022.3.10)
+
+### LegacyTx
+
+```go
+type LegacyTx struct {
+ Nonce    uint64          // nonce of sender account
+ GasPrice *big.Int        // wei per gas
+ Gas      uint64          // gas limit
+ To       *common.Address `rlp:"nil"` // nil means contract creation
+ Value    *big.Int        // wei amount
+ Data     []byte          // contract invocation input data
+ V, R, S  *big.Int        // signature values
+}
+```
+
+### AccessListTX
+
+```go
+type AccessListTx struct {
+ ChainID    *big.Int        // destination chain ID
+ Nonce      uint64          // nonce of sender account
+ GasPrice   *big.Int        // wei per gas
+ Gas        uint64          // gas limit
+ To         *common.Address `rlp:"nil"` // nil means contract creation
+ Value      *big.Int        // wei amount
+ Data       []byte          // contract invocation input data
+ AccessList AccessList      // EIP-2930 access list
+ V, R, S    *big.Int        // signature values
+}
+```
+
+### DynamicFeeTx
+
+如果我们观察DynamicFeeTx就会发现，DynamicFeeTx的定义其实就是在LegacyTx/AccessListTX的定义的基础上额外的增加了GasTipCap与GasFeeCap这两个字段。
+
+```go
+type DynamicFeeTx struct {
+ ChainID    *big.Int
+ Nonce      uint64
+ GasTipCap  *big.Int // a.k.a. maxPriorityFeePerGas
+ GasFeeCap  *big.Int // a.k.a. maxFeePerGas
+ Gas        uint64
+ To         *common.Address `rlp:"nil"` // nil means contract creation
+ Value      *big.Int
+ Data       []byte
+ AccessList AccessList
+
+ // Signature values
+ V *big.Int `json:"v" gencodec:"required"`
+ R *big.Int `json:"r" gencodec:"required"`
+ S *big.Int `json:"s" gencodec:"required"`
+}
+```
 
 ## Transaction是如何被打包并修改Blockchain中的值的
 

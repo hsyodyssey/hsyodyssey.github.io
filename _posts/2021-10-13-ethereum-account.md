@@ -131,7 +131,8 @@ type StateAccount struct {
 
 我们说上述说法是基本正确，而不是完全正确的原因有两个。首先，用户的链上数据安全是基于当前Ethereum使用的密码学工具足够保证：不存在第三方可以在**有限的时间**内在**不知道用户私钥的前提**下获取到用户的私钥信息来伪造签名交易。当然这个安全保证前提是当今Ethereum使用的密码学工具的强度足够大，没有计算机可以在有限的时间内hack出用户的私钥信息。在量子计算机出现之前，目前Ethereum和其他Blockchain使用的密码学工具的强度都是足够安全的。这也是为什么很多新的区块链项目在研究抗量子计算机密码体系的原因。第二点是，当今很多的所谓的Crypto/Token并不是链级别的数据，而是在链上合约中存储的数据，比如ERC-20 Token和NFT对应的ERC-721的Token。由于这部分的Token都是基于合约代码生成和维护的，所以这部分Token的安全同样的也依赖于合约本身的安全，比如有没有后门漏洞。如果合约本身的代码是有问题的，比如因为代码编写问题合约隐藏了给第三方任意提取其他账户下Token的漏洞，那么即使用户的私钥信息没有泄漏，合约中的Token仍然可以被第三方获取到。由于合约的代码段在链上是不可修改的。所以，有很多研究人员，技术团队在进行合约审计方面的工作，来保证上传的合约代码是安全的。
 
-下面我们简单讲述，一个账户的私钥和地址是如何产生的。
+下面我们简单讲述，一个账户的私钥和地址是如何产生的。- 这部分的示例代码位于: [https://github.com/hsyodyssey/Understanding-Ethereum-Go-version/blob/main/example/signature/main.go](example/signature)]中。
+
 
 - 首先我们通过随机得到一个长度64位account的私钥。这个私钥就是平时需要用户激活钱包时需要的记录，一旦这个私钥暴露了，钱包也将不再安全。
   - 64个16进制位，256bit，32字节
@@ -172,8 +173,6 @@ type StateAccount struct {
 - 在ECC中的+号不是四则运算中的加法，而是定义椭圆曲线C上的新的二元运算(Point Multiplication)。他代表了过两点P和Q的直线与椭圆曲线C的交点R‘关于X轴对称的点R。因为C是关于X轴对称的所以关于X对称的点也都在椭圆曲线上。
 
 ## 深入Contract
-
-- 这部分的示例代码位于: [[example/signature](example/signature)]中。
 
 ### Contract Storage (合约存储)
 
@@ -399,7 +398,7 @@ contract Storage {
 
 在Solidity中，有一类特殊的变量类型**Address**，通常用于表示账户的地址信息。例如在ERC-20合约中，用户拥有的token信息是被存储在一个(address->uint)的map结构中。在这个map中，key就是Address类型的，它表示了用户实际的address。目前Address的大小为160bits(20bytes)，并不足以填满一整个Slot。因此当Address作为value单独存储在的时候，它并不会排他的独占用一个Slot。我们使用下面的例子来说明。
 
-在下面的示例中，我们声明了三个变量，分别是number(uint256)，addr(address)，以及isTrue(bool)。我们知道，在以太坊中Address类型变量的长度是20 bytes，所以一个Address类型的变量是没办法填满整个的Slot(32 bytes)的。同时，布尔类型在以太坊中只需要一个bit(0 or 1)的空间. 因此，我们构造transaction并调用函数storeaddr来给这三个变量赋值，函数的input参数是一个uint256的值，一个address类型的值，分别为{1, “0xb6186d3a3D32232BB21E87A33a4E176853a49d12”}。
+在下面的示例中，我们声明了三个变量，分别是number(uint256)，addr(address)，以及isTrue(bool)。我们知道，在以太坊中Address类型变量的长度是20 bytes，所以一个Address类型的变量是没办法填满整个的Slot(32 bytes)的。同时，布尔类型在以太坊中只需要一个bit(0 or 1)的空间。因此，我们构造transaction并调用函数storeaddr来给这三个变量赋值，函数的input参数是一个uint256的值，一个address类型的值，分别为{1, “0xb6186d3a3D32232BB21E87A33a4E176853a49d12”}。
 
 ```solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -484,6 +483,7 @@ contract Storage {
     
 }
 ```
+
 我们构造Transaction来调用了set_balance函数，在Transaction执行之后的Storage层的结果如下面的Json所示。我们发现，对于定长的变量number占据了第一个Slot的空间(Position:0x0000000000000000000000000000000000000000000000000000000000000000)。但是对于Map类型变量balances，它包含的两个数据并没有按照变量定义的物理顺序来定义Slot。此外，我们观察到存储这两个值的Slot的key，也并不是这两个字在mapping中key的直接hash。正如我们在上段中提到的那样，Geth会使用Map中元素的的key值与当前Map被分配的slot的位置进行拼接，之后对拼接之后对值进行使用keccak256函数求得哈希值，来最终得到map中元素最终的存储位置。比如在本例中，按照变量定义的顺序，balances这个Map变量会被分配到第二个Slot，对应的Slot Position是1。因此，balances中的kv对分配到的slot的位置就是，keccak(key, 1)，这里是一个特殊的拼接操作。
 
 ```json
