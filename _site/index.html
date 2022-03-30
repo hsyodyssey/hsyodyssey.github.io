@@ -19,7 +19,17 @@
     <link rel="manifest" href="/site.webmanifest">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
-    <meta name="theme-color" content="#ffffff"> --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.css" ><!-- start custom head snippets -->
+    <meta name="theme-color" content="#ffffff"> --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.css" >
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      inlineMath: [['$','$']]
+      }
+  });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><!-- start custom head snippets -->
 
 <!-- end custom head snippets -->
 <script>(function() {
@@ -289,6 +299,41 @@
 
 <!-- end custom main top snippet -->
 <article itemscope itemtype="http://schema.org/WebPage"><header style="display:none;"><h1>Home</h1></header><meta itemprop="headline" content="Home"><meta itemprop="author" content="Siyuan Han"/><div class="js-article-content"><div class="layout--articles"><div class="article-list items items--divided"><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
+          <header><a href="/zk-snark/2022/03/22/groth16.html"><h2 itemprop="headline" class="item__header">理解Groth16，一些细节上的说明</h2></a></header>
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">V神曾经写过一篇非常好的介绍R1CS与QAP问题的文章。但是，对于不熟悉密码学的，或者说如何使用密码学的思想来解决问题的票友们来说，文章中的一些逻辑上的跨度还是大了一些。尤其是在R1CS转换成多项式形式的地方，初次接触的人可能会一脸懵逼。下面我就从我的理解来谈一谈，从R1CS到QAP这一过程。
+
+在Groth16的流程中，我们首先需要把计算问题拍平成电路。电路由若干的有输入有输出的算数电路门组成。然后根据电路门，来构造R1CS约束。
+
+这里我们直接使用V神的博客中的例子。下面的三个矩阵是就是原问题对应的电路的R1CS的约束矩阵。
+
+A
+[0, 1, 0, 0, 0, 0]
+[0, 0, 0, 1, 0, 0]
+[0, 1, 0, 0, 1, 0]
+[5, 0, 0, 0, 0, 1]
+...</div><p><a href="/zk-snark/2022/03/22/groth16.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Blockchain">Blockchain</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=ZKP">ZKP</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Groth16">Groth16</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Mar 22, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-03-22T10:00:00+08:00">
+    <meta itemprop="keywords" content="Blockchain,ZKP,Groth16"></div>
+      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
+          <header><a href="/daily/2022/03/15/pua.html"><h2 itemprop="headline" class="item__header">诈骗与PUA</h2></a></header>
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">早上的时候，我接到了一通来自泉州的移动电话。对方声称自己是京东的客服，并快速的介绍了自己的工号。一口流利的普通话，加上我对京东这个公司的好感度，我并没有第一时间挂断他的电话。在对方准确的说出了我的名字以及学校之后，事情开始变得微妙起来。对方声称，因为两会的关系，上面要求未来京东不在对学生身份的用户提供金融服务，例如白条等，让我自行的在京东APP上关闭自己的学生认证，否则可能会出现征信上的问题。并好心的向我介绍了关闭的方法，在京东APP中搜索某个页面并关闭。之后就有礼貌的挂断了电话。我按照他的指示找到了他描述的页面，但是却不是他所描述的取消学生身份的页面，只是激活了一个学生身份的会员。
+
+其实事情发展到这里并没有什么特别异常的地方，我的第一感觉还是这是通来自京东的客服推销电话。结果到下午...</div><p><a href="/daily/2022/03/15/pua.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Daily">Daily</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Mar 15, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-03-15T10:00:00+08:00">
+    <meta itemprop="keywords" content="Daily"></div>
+      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
           <header><a href="/blockchain/2022/02/02/rollup_and_ZKVM.html"><h2 itemprop="headline" class="item__header">Rollup/zk-Rollup以及zkVM/zkEVM</h2></a></header>
           <div class="item__description"><div class="article__content" itemprop="description articleBody">自从EIP-1559生效后，由于币价的升高，和基础Gas Price的约束，Ethereum Mainnet上的单笔交易费用已经高到了离谱的程度。在上个月的一次实验中，我尝试了一把在Layer-1上调用一次古早的合约，大概花了100美刀左右的交易费。就像社区内经常听到的抱怨声那样，Ethereum  Mainnet已经成为了普通用户用不起的贵族链。
 
@@ -321,9 +366,9 @@
 
 Background
 
-从中本聪发表比特币白皮书至今已经过了十几年的时光。在这十几年中，Blockchain这一技术概念，从最开始作为支持Bitcoin的分布式账本，也在不断的演化发展。Blockchain及其相关的技术，从专注于加密货币到如今的逐渐通用化，逐渐成为了集成了包括数据库，分布式系统，点对点网络，编译原理，静态软件分析，众包，密码学，经济学，货币金融学在内的等多个学科知识的一个全新技术领域。至今仍然是时下最热度最高的技术话题之一。
+距中本聪发表比特币白皮书至今已经过了十几年的时光。Blockchain这一理念，从最开始作为支持Bitcoin的分布式账本系统出发，在这十几年的演化中不断发展，从专注于加密货币到如今的逐渐通用化，逐渐成为了集成了包括数据库，分布式系统，点对点网络，编译原理，静态软件分析，众包，密码学，经济学，货币金融学，社会学在内的等多个学科知识的一个全新技术领域。至今仍然是时下最热度最高，最能引起社会讨论的技术话题之一，逐渐从小众的去中心化社区逐渐走向了主流社会的舞台。
 
-目前，市面上绝大多数的Blockchain系统都已经开源，并以开源的形式持续开发中。这就为我们提供了一种的很好的学习Blockchain技术的方式: 结合文档，结合源代码的方式对State-of-the-arts的几个Bloc...</div><p><a href="/blockchain/2022/01/01/understand-ethereum.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+目前，市面上绝大多数的热门Blockchain系统都已经开源，并继续以开源的形式在社区的维护下持续开发中。这就为我们提供了一种的极好的学习Blockchain技术的方式: 通过结合文档，结...</div><p><a href="/blockchain/2022/01/01/understand-ethereum.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Blockchain">Blockchain</a>
             </li><li>
@@ -353,13 +398,12 @@ Background
 
 Background
 
-在本文中我们来探索一下以太坊中的基本元(Metadata)之一的Account。
+在本文中我们来探索一下以太坊中的基本数据元(Metadata)之一的Account。
 
-我们知道，Ethereum的运行模型是基于交易的状态机(Transaction-based State Machine)。在这个状态几模型中，通过Transaction的执行(数据更新/删除/创建)，State会转移到另一个State。从另一个角度来看，在个模型中Transaction的执行会让系统的元对象(Meta Object)的State发生改变。在以太坊中这个元对象就是Account，而State表现(represent)出来的是Account在某个时刻的包含/对应的数据的值。
+我们知道，Ethereum是基于交易的状态机模型(Transaction-based State Machine)来运行的。在这种模型中，State基于Transaction的执行引发的数据更新/删除/创建，而转移到另一个State。具体的说，Transaction的执行会让系统元对象(Meta Object)的数据值发生改变，表现为系统元对象从一个状态转换到另一个状态。在Ethereum中，这个元对象就是Account。State表现(represent)出来的是Account在某个时刻的包含/对应的数据的值。
 
 
-  Account –&gt; Object
-  State...</div><p><a href="/blockchain/2021/10/13/ethereum-account.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+  Account –&gt...</div><p><a href="/blockchain/2021/10/13/ethereum-account.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Blockchain">Blockchain</a>
             </li><li>
@@ -398,12 +442,17 @@ Golang是一种非常适合分布式系统/数据库(Distributed System/database
     <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
       </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
           <header><a href="/blockchain/2021/07/25/ethereum_txn.html"><h2 itemprop="headline" class="item__header">一个Ethereum Transaction的生老病死</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">State-based Blockchain
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">概述
+
+Transaction是Ethereum执行数据操作的媒介。它主要起到下面的几个作用:
 
 
-  通常来说，State-based Blockchain System 的数据由两部分构成：World State 和 Blockchain。World State展示了区块链中所有Account和Contract在某个Block作为Latest Block时的Snapshot 数据。而对应的，此刻的Blockchain保存了从创始区块到当前区块时，所有的区块数据，包括区块中交易数据和区块头数据。
-  State Object是系统中基于K-V结构的基础数据元素。在Ethereum中，State Object是Account。
-  World State表示了System中所有State Object的最新值的一个Snapshot，。...</div><p><a href="/blockchain/2021/07/25/ethereum_txn.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+  在主网络上的Account之间进行Native Token的转账。
+  创建新的Contract。
+  调用Contract中会修改Contract持久化数据或者修改其他Account/Contract数据的函数。
+
+
+这里我们对Transaction功能性的细节再进行额外的补充说明。首先，Transaction只能创建Contract，而不能用于创建外部账户(EOA)。其次，关于Transaction的第三个作用我们使用了很长的定语进行说明，这里是为了强调，如果调用的Contract函数只进行了查询的操作，是不需要构造依赖Transaction的。总结下来，所有参与Account/...</div><p><a href="/blockchain/2021/07/25/ethereum_txn.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Blockchain">Blockchain</a>
             </li><li>

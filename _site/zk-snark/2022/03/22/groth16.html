@@ -1,10 +1,10 @@
 <!DOCTYPE html><html lang="en">
   <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Go语言开发Tips - Tech Notes | HSY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>理解Groth16，一些细节上的说明 - Tech Notes | HSY</title>
 
-<meta name="description" content="IntroductionThis repo records the daily programming nodes of Golang.Why Golang?Golang是一种非常适合分布式系统/数据库(Distributed System/database)，区块链(Blockchain)项目开发的编程语言，因...">
-<link rel="canonical" href="http://localhost:4000/blockchain/2021/10/10/golang.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="V神曾经写过一篇非常好的介绍R1CS与QAP问题的文章。但是，对于不熟悉密码学的，或者说如何使用密码学的思想来解决问题的票友们来说，文章中的一些逻辑上的跨度还是大了一些。尤其是在R1CS转换成多项式形式的地方，初次接触的人可能会一脸懵逼。下面我就从我的理解来谈一谈，从R1CS到QAP这一过程。在Groth16的流...">
+<link rel="canonical" href="http://localhost:4000/zk-snark/2022/03/22/groth16.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -298,193 +298,122 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>Go语言开发Tips</h1></header><span class="split-space">&nbsp;</span>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>理解Groth16，一些细节上的说明</h1></header><span class="split-space">&nbsp;</span>
           <a class="edit-on-github"
             title="Edit on Github"
-            href="https://github.com/hsyodyssey/hsyodyssey.github.io/tree/main/_posts/2021-10-11-golang.md">
-            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="Go语言开发Tips"><div class="article__info clearfix"><ul class="left-col menu"><li>
+            href="https://github.com/hsyodyssey/hsyodyssey.github.io/tree/main/_posts/2021-3-23-groth16.md">
+            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="理解Groth16，一些细节上的说明"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Blockchain">Blockchain</a>
             </li><li>
               <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Ethereum">Ethereum</a>
+                href="/archive.html?tag=ZKP">ZKP</a>
             </li><li>
               <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Go">Go</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Oct 10, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-10-10T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+                href="/archive.html?tag=Groth16">Groth16</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Mar 22, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-03-22T10:00:00+08:00">
+    <meta itemprop="keywords" content="Blockchain,ZKP,Groth16"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><h2 id="introduction">Introduction</h2>
+<div class="article__content" itemprop="articleBody"><p>V神曾经写过一篇非常好的介绍R1CS与QAP问题的<a href="https://vitalik.ca/general/2016/12/10/qap.html">文章</a>。但是，对于不熟悉密码学的，或者说如何使用密码学的思想来解决问题的票友们来说，文章中的一些逻辑上的跨度还是大了一些。尤其是在R1CS转换成多项式形式的地方，初次接触的人可能会一脸懵逼。下面我就从我的理解来谈一谈，从R1CS到QAP这一过程。</p>
 
-<p>This repo records the daily programming nodes of Golang.</p>
+<p>在Groth16的流程中，我们首先需要把<strong>计算问题</strong>拍平成<strong>电路</strong>。电路由若干的有输入有输出的算数电路门组成。然后根据电路门，来构造R1CS约束。</p>
 
-<h2 id="why-golang">Why Golang?</h2>
+<p>这里我们直接使用V神的<a href="https://vitalik.ca/general/2016/12/10/qap.html">博客</a>中的例子。下面的三个矩阵是就是原问题对应的电路的R1CS的约束矩阵。</p>
 
-<p>Golang是一种非常适合分布式系统/数据库(Distributed System/database)，区块链(Blockchain)项目开发的编程语言，因为:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>A
+[0, 1, 0, 0, 0, 0]
+[0, 0, 0, 1, 0, 0]
+[0, 1, 0, 0, 1, 0]
+[5, 0, 0, 0, 0, 1]
 
-<ul>
-  <li><strong>语法简单</strong>。它学习曲线平滑。有其他高级语言编程经验的开发人员，可以快速上手。</li>
-  <li><strong>高并发基因</strong>。它提供了强大简洁易用稳定的标准库，对高并发，分布式程序有更加灵活简洁全面的标准库支持。不需要依赖第三方库就可以快速构建后端/网络/高并发应用。</li>
-  <li><strong>跨平台</strong>。它支持跨系统交叉编译。MacOS/Win 也可以编译Linux下可以运行的程序，不需要担心环境依赖的问题。</li>
-  <li><strong>新</strong>。相对于C/C++，Golang的设计理念更新，历史包袱更少。对各种<del>新型数据结构</del>比如JSON, CSV提供了简洁流畅的原生标准库支持。</li>
-  <li><strong>快</strong>。它相比C++编译快，相比Python运行快。</li>
-</ul>
+B
+[0, 1, 0, 0, 0, 0]
+[0, 1, 0, 0, 0, 0]
+[1, 0, 0, 0, 0, 0]
+[1, 0, 0, 0, 0, 0]
 
-<p>所以Golang非常适合做一些分布式系统/数据库，区块链领域的学术/工程项目的原型(Prototype)开发工作。</p>
-
-<h2 id="不足">不足</h2>
-
-<ul>
-  <li><strong>轮子少</strong>。相比于Java生态系统中充足的轮子，Go社区中的轮子的发展还属于初级阶段。</li>
-  <li><strong>代码冗余</strong>。相比于C++，Golang对范型(Generic Programming)支持较差。对同一份逻辑，不同的数据结构需要重复的代码。</li>
-</ul>
-
-<h2 id="general-tips">General Tips</h2>
-
-<ul>
-  <li>保持包名和目录名的一致。</li>
-  <li>包名尽量简短，应该为小写单词，不要使用下划线或者驼峰式命名。</li>
-  <li>文件名为小写单词，使用下划线分割。</li>
-  <li>Go语言区分大小写，小写字母开头的单词为包内访问，相当于Java/C++中的Private。跨包使用的成员变量/函数要使用大写字母开头。</li>
-  <li>变量和结构体的命名使用驼峰式。</li>
-  <li>通过更改首字母的大小写，来控制结构体的使用场景。</li>
-  <li>常量通常使用全部大写字母。</li>
-  <li>Go结构体默认的小写字母开头的变量不是public的不能跨包访问。</li>
-  <li>通过go run *.go 或者 go build .的方式来运行多文件同package的go程序</li>
-  <li>Go语言中包括数组和Slice两种集合型数据结构。</li>
-  <li>Go语言中的数据大小是固定的。</li>
-  <li>Go语言中中Slice(切片)的大小可以是动态的。</li>
-  <li>Go语言中，可以定义一个不指明长度的切片。</li>
-  <li>二维切片需要初始化:</li>
-</ul>
-
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c">//2-D Slice init</span>
-    <span class="c">// 初始化一个n行m列的切片</span>
-    <span class="k">var</span> <span class="n">K</span><span class="p">[][]</span> <span class="kt">int</span><span class="o">.</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="o">:=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
-        <span class="n">inline</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
-        <span class="n">K</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">inline</span><span class="p">)</span>
-    <span class="p">}</span>
+C
+[0, 0, 0, 1, 0, 0]
+[0, 0, 0, 0, 1, 0]
+[0, 0, 0, 0, 0, 1]
+[0, 0, 1, 0, 0, 0]
 </code></pre></div></div>
 
-<ul>
-  <li>Go 自带了解析CSV的库 “encoding/csv”</li>
-  <li>Go Interface 是一种type</li>
-  <li>要实现Interface 必须实现interface中所有的方法</li>
-  <li>使用runtime Package中的 MemStats 和 ReadMemStats 来测量当前程序中Memory的使用状况。</li>
-  <li>Context 是 Go 1.7 之后新引入的标准库接口。</li>
-  <li>sync/atomic标准库包中提供的原子操作，通常是无锁的。</li>
-  <li>Function Types: A function type denotes the set of all functions with the same parameter and result types.</li>
-  <li>当初始化结构体时，对于结构体中复杂的成员，需要显式的声明它的类型信息，否则编译无法通过。
-    <ul>
-      <li>For example:</li>
-    </ul>
+<p>这三个矩阵都包含了四个行向量，代表了原始的计算被拍平成了在R1CS约束下的四个电路门。到了这一步，我们的原问题”<em>我们知道原始计算的一个解</em>“就转化成了，<em>“我们知道一个解向量，使得它在每个电路约束下都成立”</em>。我们用$S$来表示解向量，本例中$S$的值如下所示。</p>
 
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">pd1</span> <span class="n">PaperDetails</span> <span class="o">=</span> <span class="n">PaperDetails</span><span class="p">{</span>
-<span class="n">Title</span><span class="o">:</span>  <span class="s">"testtitle"</span><span class="p">,</span>
-<span class="n">Topics</span><span class="o">:</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test topic1"</span><span class="p">,</span> <span class="s">"test topic2"</span><span class="p">},</span>
-
-<span class="n">Authors</span><span class="o">:</span>      <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test author1"</span><span class="p">,</span> <span class="s">"test author2"</span><span class="p">},</span>
-<span class="n">Comments</span><span class="o">:</span>     <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test comment1"</span><span class="p">},</span>
-<span class="n">Keysentencts</span><span class="o">:</span> <span class="k">map</span><span class="p">[</span><span class="kt">string</span><span class="p">][]</span><span class="n">Sentence</span><span class="p">{</span><span class="s">"test topic1"</span><span class="o">:</span> <span class="p">{</span><span class="n">sent1</span><span class="p">,</span> <span class="n">sent2</span><span class="p">},</span> <span class="s">"test topic2"</span><span class="o">:</span> <span class="p">{</span><span class="n">sent2</span><span class="p">,</span> <span class="n">sent3</span><span class="p">}},</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
-</ul>
-
-<h2 id="go-struct">Go Struct</h2>
-
-<p>Struct是是Go语言中最重要的自定义的数据结构之一。它的用法与C++/Java中的class既有相同点又有不同点。</p>
-
-<ul>
-  <li>Struct 有两种初始化方式:
-    <ul>
-      <li>
-        <p>指针的方式, 这种方式会返回一个指向新的结构体的指针:</p>
-
-        <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">s</span> <span class="o">*</span> <span class="n">Student</span>
-<span class="n">s</span> <span class="o">=</span> <span class="nb">new</span><span class="p">(</span><span class="n">Student</span><span class="p">)</span>
-<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">"test"</span>
-
-<span class="err">\\</span><span class="n">or</span>
-<span class="k">var</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">new</span> <span class="p">(</span><span class="n">Student</span><span class="p">)</span>
-<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">"test"</span>
-</code></pre></div>        </div>
-      </li>
-      <li>
-        <p>With a struct literal, 这种方式会返回一个值变量(等于第一种方式的*s):</p>
-
-        <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">:=</span> <span class="n">Student</span><span class="p">{</span>
-  <span class="n">name</span><span class="o">:</span> <span class="s">"test"</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="map">Map</h2>
-
-<ul>
-  <li>可以通过第二个返回值的方式来判断map中是否存在目标key。</li>
-</ul>
-
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="n">sting</span><span class="p">)</span>
-<span class="n">m</span><span class="p">[</span><span class="s">"001"</span><span class="p">]</span> <span class="o">=</span> <span class="s">"test001"</span>
-<span class="n">m</span><span class="p">[</span><span class="s">"002"</span><span class="p">]</span> <span class="o">=</span> <span class="s">"test002"</span>
-<span class="n">value</span><span class="p">,</span> <span class="n">isExist</span> <span class="o">:=</span> <span class="n">m</span><span class="p">[</span><span class="s">"001"</span><span class="p">]</span> <span class="c">// value: string: test001, isExist: bool : true</span>
-<span class="n">value</span><span class="p">,</span> <span class="n">isExist</span> <span class="o">:=</span> <span class="n">m</span><span class="p">[</span><span class="s">"003"</span><span class="p">]</span> <span class="c">// value: , isExist: bool : false</span>
-
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+3
+35
+9
+27
+30
 </code></pre></div></div>
 
-<h2 id="fqa">FQA</h2>
+<p>此时，如果我们想证明我们知道原始计算的一个解，那么就需要证明A，B，C矩阵中的<strong>每个</strong>行向量与解向量$S$的内积之后的值是符合R1CS约束的：</p>
 
-<ul>
-  <li>What is struct{} and struct{}{} ?
-    <ul>
-      <li>struct{} 表示一个零元素的struct结构。通常会被用在没有任何信息被存储的场景中。</li>
-      <li>struct{}{} 表示一个存储了struct{}的Composite literal.</li>
-      <li>Source: <a href="https://stackoverflow.com/questions/45122905/how-do-struct-and-struct-work-in-go">Stackoverflow</a></li>
-      <li>interface是一种万能的数据类型，他可以接受任何类型的值。</li>
-    </ul>
-  </li>
-</ul>
+\[(A_i*S)* (B_i*S) - C_i*S = 0\]
 
-<h2 id="go-unit-testing">Go Unit Testing</h2>
+<p>在接下来的一步，我们需要将R1CS的约束转换成一个QAP问题，这个地方是理解zk的重点。我觉得原文中没有提到的一点时，我们为什么要这么做的？这样的转换目的是什么？V神的原文只描述了如何做，希望把向量的内积转化为多项式，如何进行拉普拉斯插值求多项式，所以第一次读到这里的时候，我感觉一头雾水。</p>
 
-<ul>
-  <li>Go 单元测试中，执行到t.Error()/ t.Errorf() 测试函数会输出错误的log信息并继续执行。</li>
-  <li>Go 单元测试中，执行到t.Fatal()/ t.Fatalf() 测试函数会输出错误的log信息并结束测试。</li>
-  <li>Go 单元测试中，如果不满足断言assert.Equal() 测试函数会结束并报错。</li>
-</ul>
+<p>这里阐述一下我的理解。这样做的原因是，如果只使用R1CS的约束矩阵来验证，我们只能一个电路门，一个电路门的，使用列向量与解向量的内积来验证是否满足R1CS的约束。这样在方式在大规模电路下（几十万，上百万的电路门）显然是十分低效的。</p>
 
-<h2 id="go-and-c-and-python">Go and C and Python</h2>
+<p>那么接下来的自然思考方向就变成了，存不存在一种办法，可以让我们<strong>一次/个计算</strong>来验证所有约束的正确性？</p>
 
-<ul>
-  <li>Python 可以调用Go编译的动态链接库 and.so (Shared Object)</li>
-  <li>Go编译成so文件时，需要在函数上一行添加//export xxx(函数名).
-    <ul>
-      <li>注意//与export中间不能有空格</li>
-      <li>Example 位于example/pygo</li>
-    </ul>
-  </li>
-</ul>
+<p>我们在观察上面的计算过程中，发现解向量中$S$中的S1元素一定与约束矩阵中A11，A21，A31，A41这四个元素相乘。因此，那么我们假设存在这样一个多项式 $A_1(x)$，它经过$(1,0), (2,0), (3,0), (4,5)$这四个点。这个多项式 $A_1(x)$的数学意义是：当x的值为1时，多项式的值为0，当$x=2$时，多项式的值为0，当$x=3$时，多项式的值为0，当$x=4$时，多项式的值为5。这样，我们通过引入额外的参数x，使得可以使用一个的多项式$A_1(x)$来描述[A11，A21，A31，A41]这四个值。</p>
 
-<h2 id="log">Log</h2>
+<p>根据原文中提到的拉普拉斯插值法，我们可以求出关于[A11，A21，A31，A41]的多项式为：</p>
 
-<ul>
-  <li>Log.Fatal会直接退出程序，不会执行defer相关的函数</li>
-</ul>
+\[A_1(x) = 0.833*x^3 -5.0*x^2 +9.166*x -5.0\]
 
-<h2 id="reference">Reference</h2>
+<p>我们验证一下就可以发现，当x取1时，A_1(x)的值为0，等于原R1CS约束矩阵中的A11的值。</p>
 
-<ul>
-  <li>Go语言高性能编程<a href="https://geektutu.com/post/high-performance-go.html">link</a></li>
-  <li>Go By Example<a href="https://gobyexample.com/">link</a></li>
-</ul>
-</div><section class="article__sharing d-print-none"></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2021-10-10T10:00:00+08:00"><!-- start custom article footer snippet -->
+<p>同样的，我们可以构造出其他列向量的多项式$A_i(x),B_i(x),C_i(x)$。那么这样，我们就可以使用这几个多项式来描述，之前判断向量内积是否满足R1CS约束的过程。等式的左边可以写成下面的形式:</p>
+
+\[((1 * A_1(x))+(3 * A_2(x))+(35 * A_3(x)) + (9 * A_4(x)) +(27 * A_5(x))+(30 * A_6(x))) \\ *（(1 * B_1(x)+(3 * B_2(x))+(35 * B_3(x)) + (9 * B_4(x)) +(27 * B_5(x))+(30 * B_6(x))) \\ - （(1 * C_1(x)+(3 * C_2(x))+(35 * C_3(x)) + (9 * C_4(x)) +(27 * C_5(x))+(30 * C_6(x)))\]
+
+<p>现在我们已经将实际的值转换成了多项式，根据x的取值的不同，来描述不同的R1CS约束。那么，更进一步的来说，因为上面的式子中都是多项式，我们可以把等式左边展开成一个更简洁的多项式 $t(x)$:</p>
+
+\[t(x) = (-5.166*x^3+38.5*x^2-73.333*x+43)*(0.666*x^3-5.0*x^2+10.333*x-3.0)-(2.833*x^3-24.5*x^2+10.333*x-41.0)\\
+       = -3.440556*x^6+51.471*x^5-294.720056*x^4+805.7885*x^3-1063.749889*x^2+592.652*x-88\]
+
+<p>同时我们需要让等式右边的值等于0。因此我们就可以先构造一个多项式$z(x)=(x-1)(x-2)(x-3)(x-4)$。显然$z(x)$在x的取值为[1，2，3，4]值情况下都等于0。在本例中，显然$z(x)$是不等于$t(x)$（多项式的阶不同），所以我们引入另一个多项式$h(x)$，使得$t(x)=z(x)h(x)$。</p>
+
+<p>这里，其实依赖了一个数学引理: <a href="https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma">Schwartz–Zippel lemma</a>。简单的说，对于两个多项式$f(x)$,$g(x)$来说，这两个多项式在某点处，相等的概率很低。感兴趣的读者可以深入了解一下这个引理。</p>
+
+<p>这样我们就实现了用一个多项式来描述所有的R1CS的约束了。我们可以设置x值取1，2，3，4，来验证对应的电路的R1CS约束是不是合法。在实际问题上，x的取值远不止范围1，2，3，4四个值。在ZK-System中，x所选用的field通常是在一个椭圆曲线上的循环群。</p>
+
+<p>现在的关于<strong>我们是否知道原问题的解的证明</strong>转换成了，<strong>我们是否知道一个多项式$t(x)$使得$t(x)=z(x)h(x)$在x在一个循环群的域上都成立</strong>。</p>
+
+<p>那么，顺着这个逻辑继续思考，<em>我们如何向其他人证明我们知道这个多项式$t(x)$的存在的呢？</em></p>
+
+<p>一个简单的想法可以是这样的。在公式$t(x)=z(x)h(x)$中，$z(x)$是公开的多项式，那么作为知道$t(x)$的Prover，我们可以快速的计算出$h(x)=\frac{t(x)}{z(x)}$。那么，我们只要提供某个x对应的$h(x)$,$t(x)$的值给验证者。那么显然，验证者通过计算$z(x)*h(x)$的值，与Prover提供的$t(x)$的值进行比较验证。那么作为Prover，我们不需要公开$t(x)$的细节，就可以向Verifier证明我们知道多项式$t(x)$。</p>
+
+<p>那么想象一下，Alice对Bob说，我知道一个计算的解。那么Bob可以要求Alice计算$x=r$时，$h(r)$和$t(r)$的值，并且验证$h(r)*z(r)$是否与$t(r)$的值是否相等来判断Alice说的是否正确。在这个过程我们完美的隐藏掉了原来解向量$S$的存在。</p>
+
+<p>通过，上面的过程，我们就完成了一个简单的零知识问题的转换。但是这个模型并不足够安全，比如Alice可以伪造合法的$h(r)$和$t(r)$的值，使得$t(r)=z(r)h(r)$成立。具体的来说，比如不管Bob请求任意r下的$h(r)$值，Alice总是返回$h(r),t(r) == 0$。用稍微正式的语言来描述这个现象就是：Alice知道了$r$的具体值之后，可以计算出另一组值$t(r’)$,$h(r’)$，使得$t(r’)=z(r)h(r’)$成立。因此在这种情况下，等式的左右两边仍然是相同的，但是不符合我们的目标。</p>
+
+<p>因此，顺着这个逻辑思考，接下来的需要解决的问题就变成了，<em>如何保证Prover不会伪造</em>$h(r)$,$t(r)$的值呢？</p>
+
+<p>目前这部分主要是通过Polynomial Commitment Scheme (PCS)这项技术来解决的。Groth16中，使用的PCS是 Kate Commitments(KZG Commitments), 它是一种Pairing-based PCS。Kate Commitments需要对多项式(电路)建立Common Reference String(CRS)。这也就是我们常常听到的Trusted Setup。Trusted Setup带了不少负面效果。一旦Trusted Setup时的信息发生了泄漏，整个的Proof System的安全性保证也就不存在了。同时在Groth16中，我们需要对每个多项式都进行Trusted Setup的。换句话说，我们需要对每个计算电路都要进行一次的Trusted Setup，这对于图灵完备的通用计算来说成本是非常高的。这也是为什么ZCash可以良好的运行ZK-SNARKs，而很少见到在General-Purpose Blockchain中使用ZK-SNARKs的原因。</p>
+
+<p>为了解决这方面的问题，研究人员提出了<a href="https://crypto.stanford.edu/bulletproofs/">BulletProof</a>，这是一种基于inner produce-base PCS，在BulletProof中，不需要Trusted Setup，但是需要更多的Proof Size。</p>
+
+<p>另一方面，研究人员提出了Plonk协议。在Plonk体系中，只需要一次的Trusted Setup就可以给多个多项式进行验证。比较热门的基于zk-rollup技术的Layer-2系统ZKSync就是基于Plonk协议开发的。</p>
+
+<p>关于PCS的技术在本篇中不做详解。感兴趣的读者可以搜索相关的关键词进行学习。</p>
+
+<h2 id="references">References</h2>
+
+<ol>
+  <li>Bulletproofs: Short Proofs for Confidential Transactions and More, <a href="https://crypto.stanford.edu/bulletproofs/">[link]</a></li>
+  <li>Schwartz–Zippel lemma, <a href="https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma">[link]</a></li>
+  <li>Quadratic Arithmetic Programs: from Zero to Hero, <a href="https://vitalik.ca/general/2016/12/10/qap.html">[link]</a></li>
+  <li>Kate Commitments: A Primer, <a href="https://hackmd.io/@tompocock/Hk2A7BD6U">[link]</a></li>
+  <li>Constant-Size Commitments to Polynomials and Their Applications, <a href="https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf">[link]</a></li>
+</ol>
+</div><section class="article__sharing d-print-none"></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2022-03-22T10:00:00+08:00"><!-- start custom article footer snippet -->
 
 <!-- end custom article footer snippet -->
 <div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
@@ -495,7 +424,7 @@
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/blockchain/2021/07/25/ethereum_txn.html">一个Ethereum Transaction的生老病死</a></div><div class="next"><span>NEXT</span><a href="/blockchain/2021/10/13/ethereum-account.html">以太坊源码分析: 账户与合约(Account and Contract)</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/daily/2022/03/15/pua.html">诈骗与PUA</a></div></div></div>
 
 </div>
 

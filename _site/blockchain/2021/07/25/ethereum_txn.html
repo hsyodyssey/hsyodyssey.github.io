@@ -3,7 +3,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>一个Ethereum Transaction的生老病死 - Tech Notes | HSY</title>
 
-<meta name="description" content="State-based Blockchain  通常来说，State-based Blockchain System 的数据由两部分构成：World State 和 Blockchain。World State展示了区块链中所有Account和Contract在某个Block作为Latest Block时的Sna...">
+<meta name="description" content="概述Transaction是Ethereum执行数据操作的媒介。它主要起到下面的几个作用:  在主网络上的Account之间进行Native Token的转账。  创建新的Contract。  调用Contract中会修改Contract持久化数据或者修改其他Account/Contract数据的函数。这里我们对...">
 <link rel="canonical" href="http://localhost:4000/blockchain/2021/07/25/ethereum_txn.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-config" content="/assets/browserconfig.xml">
@@ -18,7 +18,17 @@
     <link rel="manifest" href="/site.webmanifest">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
-    <meta name="theme-color" content="#ffffff"> --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.css" ><!-- start custom head snippets -->
+    <meta name="theme-color" content="#ffffff"> --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.css" >
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      inlineMath: [['$','$']]
+      }
+  });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><!-- start custom head snippets -->
 
 <!-- end custom head snippets -->
 <script>(function() {
@@ -306,16 +316,106 @@
     <meta itemprop="keywords" content="Blockchain,Ethereum,Go"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><h2 id="state-based-blockchain">State-based Blockchain</h2>
+<div class="article__content" itemprop="articleBody"><h2 id="概述">概述</h2>
 
-<ul>
-  <li>通常来说，State-based Blockchain System 的数据由两部分构成：World State 和 Blockchain。World State展示了区块链中所有Account和Contract在某个Block作为Latest Block时的Snapshot 数据。而对应的，此刻的Blockchain保存了从创始区块到当前区块时，所有的区块数据，包括区块中交易数据和区块头数据。</li>
-  <li>State Object是系统中基于K-V结构的基础数据元素。在Ethereum中，State Object是Account。</li>
-  <li>World State表示了System中所有State Object的最新值的一个Snapshot，。</li>
-  <li>Blockchain是以块为单位的数据结构，每个爱上中包含了若干Transaction。Blockchain 可以被视为历史交易数据的组合。</li>
-  <li>Transaction是Blockchain System中与承载数据更新的载体。通过Transaction，State Object从当前状态切换到另一个状态。</li>
-  <li>World State的更新是以Block为单位的。</li>
-</ul>
+<p>Transaction是Ethereum执行数据操作的媒介。它主要起到下面的几个作用:</p>
+
+<ol>
+  <li>在主网络上的Account之间进行Native Token的转账。</li>
+  <li>创建新的Contract。</li>
+  <li>调用Contract中会修改Contract持久化数据或者修改其他Account/Contract数据的函数。</li>
+</ol>
+
+<p>这里我们对Transaction功能性的细节再进行额外的补充说明。首先，Transaction只能创建Contract，而不能用于创建外部账户(EOA)。其次，关于Transaction的第三个作用我们使用了很长的定语进行说明，这里是为了强调，如果调用的Contract函数只进行了查询的操作，是不需要构造依赖Transaction的。总结下来，所有参与Account/Contract数据修改的操作都需要通过Transaction来进行。第三，Transaction只能由外部账户(EOA)构建，Contract是没办法构交易的。</p>
+
+<h2 id="legacytx--accesslisttx--dynamicfeetx">LegacyTx &amp; AccessListTX &amp; DynamicFeeTx</h2>
+
+<p>下面我们根据源代码中的定义来了解一下Transaction具体的数据结构的定义，了解其包含的相关变量。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Transaction</span> <span class="k">struct</span> <span class="p">{</span>
+ <span class="n">inner</span> <span class="n">TxData</span>    <span class="c">// Consensus contents of a transaction</span>
+ <span class="n">time</span>  <span class="n">time</span><span class="o">.</span><span class="n">Time</span> <span class="c">// Time first seen locally (spam avoidance)</span>
+
+ <span class="c">// caches</span>
+ <span class="n">hash</span> <span class="n">atomic</span><span class="o">.</span><span class="n">Value</span>
+ <span class="n">size</span> <span class="n">atomic</span><span class="o">.</span><span class="n">Value</span>
+ <span class="n">from</span> <span class="n">atomic</span><span class="o">.</span><span class="n">Value</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">TxData</span> <span class="k">interface</span> <span class="p">{</span>
+ <span class="n">txType</span><span class="p">()</span> <span class="kt">byte</span> <span class="c">// returns the type ID</span>
+ <span class="nb">copy</span><span class="p">()</span> <span class="n">TxData</span> <span class="c">// creates a deep copy and initializes all fields</span>
+
+ <span class="n">chainID</span><span class="p">()</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
+ <span class="n">accessList</span><span class="p">()</span> <span class="n">AccessList</span>
+ <span class="n">data</span><span class="p">()</span> <span class="p">[]</span><span class="kt">byte</span>
+ <span class="n">gas</span><span class="p">()</span> <span class="kt">uint64</span>
+ <span class="n">gasPrice</span><span class="p">()</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
+ <span class="n">gasTipCap</span><span class="p">()</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
+ <span class="n">gasFeeCap</span><span class="p">()</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
+ <span class="n">value</span><span class="p">()</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
+ <span class="n">nonce</span><span class="p">()</span> <span class="kt">uint64</span>
+ <span class="n">to</span><span class="p">()</span> <span class="o">*</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span>
+
+ <span class="n">rawSignatureValues</span><span class="p">()</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">s</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span><span class="p">)</span>
+ <span class="n">setSignatureValues</span><span class="p">(</span><span class="n">chainID</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">s</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里注意，在目前版本的geth中(1.10.*)，根据<a href="https://eips.ethereum.org/EIPS/eip-2718">EIP-2718</a>的设计，原来的TxData现在被声明成了一个interface，而不是定义了具体的结构。这样的设计好处在于，后续版本的更新中可以对Transaction类型进行更加灵活的修改。目前，在Ethereum中定义了三种类型的Transaction来实现TxData这个接口。按照时间上的定义顺序来说，这三种类型的Transaction分别是，LegacyT，AccessListTx，TxDynamicFeeTx。LegacyTx顾名思义，是原始的Ethereum的Transaction设计，目前市面上大部分早年关于Ethereum Transaction结构的文档实际上都是在描述LegacyTx的结构。而AccessListTX是基于EIP-2930(Berlin分叉)的Transaction。DynamicFeeTx是<a href="https://eips.ethereum.org/EIPS/eip-1559">EIP-1559</a>(伦敦分叉)生效之后的默认的Transaction。</p>
+
+<p>(PS:目前Ethereum的黄皮书只更新到了Berlin分叉的内容，还没有添加London分叉的更新, 2022.3.10)</p>
+
+<h3 id="legacytx">LegacyTx</h3>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">LegacyTx</span> <span class="k">struct</span> <span class="p">{</span>
+ <span class="n">Nonce</span>    <span class="kt">uint64</span>          <span class="c">// nonce of sender account</span>
+ <span class="n">GasPrice</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>        <span class="c">// wei per gas</span>
+ <span class="n">Gas</span>      <span class="kt">uint64</span>          <span class="c">// gas limit</span>
+ <span class="n">To</span>       <span class="o">*</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span> <span class="s">`rlp:"nil"`</span> <span class="c">// nil means contract creation</span>
+ <span class="n">Value</span>    <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>        <span class="c">// wei amount</span>
+ <span class="n">Data</span>     <span class="p">[]</span><span class="kt">byte</span>          <span class="c">// contract invocation input data</span>
+ <span class="n">V</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">S</span>  <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>        <span class="c">// signature values</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="accesslisttx">AccessListTX</h3>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">AccessListTx</span> <span class="k">struct</span> <span class="p">{</span>
+ <span class="n">ChainID</span>    <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>        <span class="c">// destination chain ID</span>
+ <span class="n">Nonce</span>      <span class="kt">uint64</span>          <span class="c">// nonce of sender account</span>
+ <span class="n">GasPrice</span>   <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>        <span class="c">// wei per gas</span>
+ <span class="n">Gas</span>        <span class="kt">uint64</span>          <span class="c">// gas limit</span>
+ <span class="n">To</span>         <span class="o">*</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span> <span class="s">`rlp:"nil"`</span> <span class="c">// nil means contract creation</span>
+ <span class="n">Value</span>      <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>        <span class="c">// wei amount</span>
+ <span class="n">Data</span>       <span class="p">[]</span><span class="kt">byte</span>          <span class="c">// contract invocation input data</span>
+ <span class="n">AccessList</span> <span class="n">AccessList</span>      <span class="c">// EIP-2930 access list</span>
+ <span class="n">V</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">S</span>    <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>        <span class="c">// signature values</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="dynamicfeetx">DynamicFeeTx</h3>
+
+<p>如果我们观察DynamicFeeTx就会发现，DynamicFeeTx的定义其实就是在LegacyTx/AccessListTX的定义的基础上额外的增加了GasTipCap与GasFeeCap这两个字段。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">DynamicFeeTx</span> <span class="k">struct</span> <span class="p">{</span>
+ <span class="n">ChainID</span>    <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
+ <span class="n">Nonce</span>      <span class="kt">uint64</span>
+ <span class="n">GasTipCap</span>  <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span> <span class="c">// a.k.a. maxPriorityFeePerGas</span>
+ <span class="n">GasFeeCap</span>  <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span> <span class="c">// a.k.a. maxFeePerGas</span>
+ <span class="n">Gas</span>        <span class="kt">uint64</span>
+ <span class="n">To</span>         <span class="o">*</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span> <span class="s">`rlp:"nil"`</span> <span class="c">// nil means contract creation</span>
+ <span class="n">Value</span>      <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
+ <span class="n">Data</span>       <span class="p">[]</span><span class="kt">byte</span>
+ <span class="n">AccessList</span> <span class="n">AccessList</span>
+
+ <span class="c">// Signature values</span>
+ <span class="n">V</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span> <span class="s">`json:"v" gencodec:"required"`</span>
+ <span class="n">R</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span> <span class="s">`json:"r" gencodec:"required"`</span>
+ <span class="n">S</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span> <span class="s">`json:"s" gencodec:"required"`</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h2 id="transaction是如何被打包并修改blockchain中的值的">Transaction是如何被打包并修改Blockchain中的值的</h2>
 

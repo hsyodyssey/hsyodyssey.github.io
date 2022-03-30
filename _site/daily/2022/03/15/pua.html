@@ -1,10 +1,10 @@
 <!DOCTYPE html><html lang="en">
   <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Go语言开发Tips - Tech Notes | HSY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>诈骗与PUA - Tech Notes | HSY</title>
 
-<meta name="description" content="IntroductionThis repo records the daily programming nodes of Golang.Why Golang?Golang是一种非常适合分布式系统/数据库(Distributed System/database)，区块链(Blockchain)项目开发的编程语言，因...">
-<link rel="canonical" href="http://localhost:4000/blockchain/2021/10/10/golang.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="description" content="早上的时候，我接到了一通来自泉州的移动电话。对方声称自己是京东的客服，并快速的介绍了自己的工号。一口流利的普通话，加上我对京东这个公司的好感度，我并没有第一时间挂断他的电话。在对方准确的说出了我的名字以及学校之后，事情开始变得微妙起来。对方声称，因为两会的关系，上面要求未来京东不在对学生身份的用户提供金融服务，例...">
+<link rel="canonical" href="http://localhost:4000/daily/2022/03/15/pua.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -298,193 +298,32 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>Go语言开发Tips</h1></header><span class="split-space">&nbsp;</span>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>诈骗与PUA</h1></header><span class="split-space">&nbsp;</span>
           <a class="edit-on-github"
             title="Edit on Github"
-            href="https://github.com/hsyodyssey/hsyodyssey.github.io/tree/main/_posts/2021-10-11-golang.md">
-            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="Go语言开发Tips"><div class="article__info clearfix"><ul class="left-col menu"><li>
+            href="https://github.com/hsyodyssey/hsyodyssey.github.io/tree/main/_posts/2022-03-15-pua.md">
+            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="诈骗与PUA"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Blockchain">Blockchain</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Ethereum">Ethereum</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Go">Go</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Oct 10, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-10-10T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+                href="/archive.html?tag=Daily">Daily</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Mar 15, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-03-15T10:00:00+08:00">
+    <meta itemprop="keywords" content="Daily"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
 
 <!-- end custom article top snippet -->
-<div class="article__content" itemprop="articleBody"><h2 id="introduction">Introduction</h2>
+<div class="article__content" itemprop="articleBody"><p>早上的时候，我接到了一通来自泉州的移动电话。对方声称自己是京东的客服，并快速的介绍了自己的工号。一口流利的普通话，加上我对京东这个公司的好感度，我并没有第一时间挂断他的电话。在对方准确的说出了我的名字以及学校之后，事情开始变得微妙起来。对方声称，因为两会的关系，上面要求未来京东不在对学生身份的用户提供金融服务，例如白条等，让我自行的在京东APP上关闭自己的学生认证，否则可能会出现征信上的问题。并好心的向我介绍了关闭的方法，在京东APP中搜索某个页面并关闭。之后就有礼貌的挂断了电话。我按照他的指示找到了他描述的页面，但是却不是他所描述的取消学生身份的页面，只是激活了一个学生身份的会员。</p>
 
-<p>This repo records the daily programming nodes of Golang.</p>
+<p>其实事情发展到这里并没有什么特别异常的地方，我的第一感觉还是这是通来自京东的客服推销电话。结果到下午的时候，我接到了第二通电话。对方上了就是指责我并没有理会他同事的后续电话，按照他同事的要求取消我在京东上的学生认证，并警告我如果不及时处理，他们将会向我做出滞纳金的处罚。我当下感觉十分的气愤，并强烈的回敬说京东算个鸡吧，我作为你司长期股东加大客户，你凭什么收我的钱？对方大概是没有见到过我这么粗暴的“目标”，当下表示不是这个意思，只是为了帮我解决问题。但我余怒未消，感觉到作为京东大客户反遭背刺，臭骂对方一句，并扬言要自己打电话给官方投诉他，然后挂掉了电话。</p>
 
-<h2 id="why-golang">Why Golang?</h2>
+<p>事情发展到这里，读者大概也已经猜到了，这是连续的电信诈骗电话。在挂掉电话后，我当下就打电话给了京东的官方客服，并向他询问我是不是遇到了诈骗。不得不说，真正的京东客服态度是真的好，非常和善的告诉我，他们不会对客户说出罚款之类的话，显然这就是电话诈骗。</p>
 
-<p>Golang是一种非常适合分布式系统/数据库(Distributed System/database)，区块链(Blockchain)项目开发的编程语言，因为:</p>
+<p>在这次事件中，我并没有什么损失，除了几分钟的气愤。但是，我也必须承认，这个骗子团伙确实骗到了我。其实在最开始的时候，我就问了他一个问题，为什么你们京东的客服电话是一个泉州的手机号码，而不是常见的官方电话，或者是宿迁的电话？但是在对方准确的叫出了我的名字，并给了一定的解释之后，我选择了相信。在第二通电话中，对方声称的上面要求的罚款，滞纳金，我还是相信了。单从骗人的角度来说，对面的骗子确实完成了既定目标，只不过我并没有顺着他设好的思维路径继续下去。</p>
 
-<ul>
-  <li><strong>语法简单</strong>。它学习曲线平滑。有其他高级语言编程经验的开发人员，可以快速上手。</li>
-  <li><strong>高并发基因</strong>。它提供了强大简洁易用稳定的标准库，对高并发，分布式程序有更加灵活简洁全面的标准库支持。不需要依赖第三方库就可以快速构建后端/网络/高并发应用。</li>
-  <li><strong>跨平台</strong>。它支持跨系统交叉编译。MacOS/Win 也可以编译Linux下可以运行的程序，不需要担心环境依赖的问题。</li>
-  <li><strong>新</strong>。相对于C/C++，Golang的设计理念更新，历史包袱更少。对各种<del>新型数据结构</del>比如JSON, CSV提供了简洁流畅的原生标准库支持。</li>
-  <li><strong>快</strong>。它相比C++编译快，相比Python运行快。</li>
-</ul>
+<p>我想诈骗和PUA一样，都是一种在精心设计好的框架下的精神控制。如果顺着对方的逻辑，受害者注定是逃不出对方的圈套的。仔细思考了一下，诈骗和PUA一样，首先都是要骗取受害人的信任，卸下防备。比如在上述的案例中，准确的说出我的名字和学校。第二步，充当善意的好人。在这一个步骤中，对方并不会对受害人索取什么，反而充当一种提供帮助的角色，不管是物质帮助，或者精神帮助。比如，在这次诈骗中，骗子的第一个电话的目的是为了帮我解决潜在的风险。第三步，对受害人开始有边界的威胁，这种威胁一定不是用力过猛的狠毒威胁，而是由边界的轻拿轻的放的威胁。比如利用受害人对公权力的敬畏，在我经历这个案例中，骗子就声称如果不解决这个问题，就会影响到我未来的征信记录。或者，利用人性的善意，比如新闻中的常客，杀猪盘，就是利用了人性中害怕失去的善良，仿佛如果你不打钱给对方，就会永远失去对方。</p>
 
-<p>所以Golang非常适合做一些分布式系统/数据库，区块链领域的学术/工程项目的原型(Prototype)开发工作。</p>
+<p>PUA也好，诈骗也好，都是缺大德的下贱至极的行为。能做出这种事情的，也都是丧尽天良之人中的渣滓中的臭蛆。拉低人类这种生物的道德底线的烂人中的烂人。</p>
 
-<h2 id="不足">不足</h2>
-
-<ul>
-  <li><strong>轮子少</strong>。相比于Java生态系统中充足的轮子，Go社区中的轮子的发展还属于初级阶段。</li>
-  <li><strong>代码冗余</strong>。相比于C++，Golang对范型(Generic Programming)支持较差。对同一份逻辑，不同的数据结构需要重复的代码。</li>
-</ul>
-
-<h2 id="general-tips">General Tips</h2>
-
-<ul>
-  <li>保持包名和目录名的一致。</li>
-  <li>包名尽量简短，应该为小写单词，不要使用下划线或者驼峰式命名。</li>
-  <li>文件名为小写单词，使用下划线分割。</li>
-  <li>Go语言区分大小写，小写字母开头的单词为包内访问，相当于Java/C++中的Private。跨包使用的成员变量/函数要使用大写字母开头。</li>
-  <li>变量和结构体的命名使用驼峰式。</li>
-  <li>通过更改首字母的大小写，来控制结构体的使用场景。</li>
-  <li>常量通常使用全部大写字母。</li>
-  <li>Go结构体默认的小写字母开头的变量不是public的不能跨包访问。</li>
-  <li>通过go run *.go 或者 go build .的方式来运行多文件同package的go程序</li>
-  <li>Go语言中包括数组和Slice两种集合型数据结构。</li>
-  <li>Go语言中的数据大小是固定的。</li>
-  <li>Go语言中中Slice(切片)的大小可以是动态的。</li>
-  <li>Go语言中，可以定义一个不指明长度的切片。</li>
-  <li>二维切片需要初始化:</li>
-</ul>
-
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c">//2-D Slice init</span>
-    <span class="c">// 初始化一个n行m列的切片</span>
-    <span class="k">var</span> <span class="n">K</span><span class="p">[][]</span> <span class="kt">int</span><span class="o">.</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="o">:=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
-        <span class="n">inline</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
-        <span class="n">K</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">inline</span><span class="p">)</span>
-    <span class="p">}</span>
-</code></pre></div></div>
-
-<ul>
-  <li>Go 自带了解析CSV的库 “encoding/csv”</li>
-  <li>Go Interface 是一种type</li>
-  <li>要实现Interface 必须实现interface中所有的方法</li>
-  <li>使用runtime Package中的 MemStats 和 ReadMemStats 来测量当前程序中Memory的使用状况。</li>
-  <li>Context 是 Go 1.7 之后新引入的标准库接口。</li>
-  <li>sync/atomic标准库包中提供的原子操作，通常是无锁的。</li>
-  <li>Function Types: A function type denotes the set of all functions with the same parameter and result types.</li>
-  <li>当初始化结构体时，对于结构体中复杂的成员，需要显式的声明它的类型信息，否则编译无法通过。
-    <ul>
-      <li>For example:</li>
-    </ul>
-
-    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">pd1</span> <span class="n">PaperDetails</span> <span class="o">=</span> <span class="n">PaperDetails</span><span class="p">{</span>
-<span class="n">Title</span><span class="o">:</span>  <span class="s">"testtitle"</span><span class="p">,</span>
-<span class="n">Topics</span><span class="o">:</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test topic1"</span><span class="p">,</span> <span class="s">"test topic2"</span><span class="p">},</span>
-
-<span class="n">Authors</span><span class="o">:</span>      <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test author1"</span><span class="p">,</span> <span class="s">"test author2"</span><span class="p">},</span>
-<span class="n">Comments</span><span class="o">:</span>     <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"test comment1"</span><span class="p">},</span>
-<span class="n">Keysentencts</span><span class="o">:</span> <span class="k">map</span><span class="p">[</span><span class="kt">string</span><span class="p">][]</span><span class="n">Sentence</span><span class="p">{</span><span class="s">"test topic1"</span><span class="o">:</span> <span class="p">{</span><span class="n">sent1</span><span class="p">,</span> <span class="n">sent2</span><span class="p">},</span> <span class="s">"test topic2"</span><span class="o">:</span> <span class="p">{</span><span class="n">sent2</span><span class="p">,</span> <span class="n">sent3</span><span class="p">}},</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
-  </li>
-</ul>
-
-<h2 id="go-struct">Go Struct</h2>
-
-<p>Struct是是Go语言中最重要的自定义的数据结构之一。它的用法与C++/Java中的class既有相同点又有不同点。</p>
-
-<ul>
-  <li>Struct 有两种初始化方式:
-    <ul>
-      <li>
-        <p>指针的方式, 这种方式会返回一个指向新的结构体的指针:</p>
-
-        <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">s</span> <span class="o">*</span> <span class="n">Student</span>
-<span class="n">s</span> <span class="o">=</span> <span class="nb">new</span><span class="p">(</span><span class="n">Student</span><span class="p">)</span>
-<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">"test"</span>
-
-<span class="err">\\</span><span class="n">or</span>
-<span class="k">var</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">new</span> <span class="p">(</span><span class="n">Student</span><span class="p">)</span>
-<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">"test"</span>
-</code></pre></div>        </div>
-      </li>
-      <li>
-        <p>With a struct literal, 这种方式会返回一个值变量(等于第一种方式的*s):</p>
-
-        <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">:=</span> <span class="n">Student</span><span class="p">{</span>
-  <span class="n">name</span><span class="o">:</span> <span class="s">"test"</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div>        </div>
-      </li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="map">Map</h2>
-
-<ul>
-  <li>可以通过第二个返回值的方式来判断map中是否存在目标key。</li>
-</ul>
-
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="n">sting</span><span class="p">)</span>
-<span class="n">m</span><span class="p">[</span><span class="s">"001"</span><span class="p">]</span> <span class="o">=</span> <span class="s">"test001"</span>
-<span class="n">m</span><span class="p">[</span><span class="s">"002"</span><span class="p">]</span> <span class="o">=</span> <span class="s">"test002"</span>
-<span class="n">value</span><span class="p">,</span> <span class="n">isExist</span> <span class="o">:=</span> <span class="n">m</span><span class="p">[</span><span class="s">"001"</span><span class="p">]</span> <span class="c">// value: string: test001, isExist: bool : true</span>
-<span class="n">value</span><span class="p">,</span> <span class="n">isExist</span> <span class="o">:=</span> <span class="n">m</span><span class="p">[</span><span class="s">"003"</span><span class="p">]</span> <span class="c">// value: , isExist: bool : false</span>
-
-</code></pre></div></div>
-
-<h2 id="fqa">FQA</h2>
-
-<ul>
-  <li>What is struct{} and struct{}{} ?
-    <ul>
-      <li>struct{} 表示一个零元素的struct结构。通常会被用在没有任何信息被存储的场景中。</li>
-      <li>struct{}{} 表示一个存储了struct{}的Composite literal.</li>
-      <li>Source: <a href="https://stackoverflow.com/questions/45122905/how-do-struct-and-struct-work-in-go">Stackoverflow</a></li>
-      <li>interface是一种万能的数据类型，他可以接受任何类型的值。</li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="go-unit-testing">Go Unit Testing</h2>
-
-<ul>
-  <li>Go 单元测试中，执行到t.Error()/ t.Errorf() 测试函数会输出错误的log信息并继续执行。</li>
-  <li>Go 单元测试中，执行到t.Fatal()/ t.Fatalf() 测试函数会输出错误的log信息并结束测试。</li>
-  <li>Go 单元测试中，如果不满足断言assert.Equal() 测试函数会结束并报错。</li>
-</ul>
-
-<h2 id="go-and-c-and-python">Go and C and Python</h2>
-
-<ul>
-  <li>Python 可以调用Go编译的动态链接库 and.so (Shared Object)</li>
-  <li>Go编译成so文件时，需要在函数上一行添加//export xxx(函数名).
-    <ul>
-      <li>注意//与export中间不能有空格</li>
-      <li>Example 位于example/pygo</li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="log">Log</h2>
-
-<ul>
-  <li>Log.Fatal会直接退出程序，不会执行defer相关的函数</li>
-</ul>
-
-<h2 id="reference">Reference</h2>
-
-<ul>
-  <li>Go语言高性能编程<a href="https://geektutu.com/post/high-performance-go.html">link</a></li>
-  <li>Go By Example<a href="https://gobyexample.com/">link</a></li>
-</ul>
-</div><section class="article__sharing d-print-none"></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2021-10-10T10:00:00+08:00"><!-- start custom article footer snippet -->
+<p>破除PUA与诈骗的方式主要方式就是要忠于自己。当其他人试图精神控制的时候，跳出他们的思维路径，认真思考，<strong>假如我不按照他说的那么做，又会这样呢？</strong></p>
+</div><section class="article__sharing d-print-none"></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2022-03-15T10:00:00+08:00"><!-- start custom article footer snippet -->
 
 <!-- end custom article footer snippet -->
 <div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
@@ -495,7 +334,7 @@
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/blockchain/2021/07/25/ethereum_txn.html">一个Ethereum Transaction的生老病死</a></div><div class="next"><span>NEXT</span><a href="/blockchain/2021/10/13/ethereum-account.html">以太坊源码分析: 账户与合约(Account and Contract)</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/blockchain/2022/02/02/rollup_and_ZKVM.html">Rollup/zk-Rollup以及zkVM/zkEVM</a></div><div class="next"><span>NEXT</span><a href="/zk-snark/2022/03/22/groth16.html">理解Groth16，一些细节上的说明</a></div></div></div>
 
 </div>
 
