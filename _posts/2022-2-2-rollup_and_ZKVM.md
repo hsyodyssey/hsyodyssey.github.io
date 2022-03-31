@@ -25,6 +25,8 @@ Rollup看上去完美的解决了Ethereum面临的两大难题，通过分层的
 
 ## Optimism-Rollup
 
+- Optimism
+  - 原Plasma团队的作品，乐观模式。
 - Arbitrum
   - 乐观模式，Layer-2完全兼容EVM，通过设置挑战时间来保证跨链交易，目前是one week。
 
@@ -34,15 +36,16 @@ ZK-Rollup核心是利用了Zero-Knowledge Proof的技术来实现rollup。ZKP里
 
 但是正因为ZKP的一些特性，使得ZK-Rollup相比于Optimism-Rollup，在开发上的并没有进行的那么顺利。
 
-我们知道ZK-SNARKs的计算的基础来自于:*将一个计算电路(Circuit)，转化为R1CS的形式*，继而转化为QAP问题，最终将问题的Witness生成零知识的Proof。如果我们想生成一个Problem/Computation/Function的ZK-SNARKs的Witness/Proof，那么首先我们需要要把这个问题转化为一个Circuit的形式。或者说用Circuit的语言，用R1CS的形式来描述原计算问题。对于简单的计算问题来说，比如加减计算，解方程组，将问题转化为电路的形式并不是特别的困难。但是对于Ethereum上各种支持图灵完备的智能合约的function来说这个问题就变得非常的棘手。主要因为：
+拿一个应用广泛的ZK-SNARKs协议Groth16举例来说，其计算的基础来自于:*将一个计算电路(Circuit)，转化为R1CS的形式*，继而转化为QAP问题，最终将问题的Witness生成零知识的Proof。如果我们想生成一个Problem/Computation/Function的ZK-SNARKs的Witness/Proof，那么首先我们需要要把这个问题转化为一个Circuit的形式。或者说用Circuit的语言，用R1CS的形式来描述原计算问题。对于简单的计算问题来说，比如加减计算，解方程组，将问题转化为电路的形式并不是特别的困难。但是对于Ethereum上各种支持图灵完备的智能合约的function来说这个问题就变得非常的棘手。主要因为：
 
 - 转化生成的电路是静态的，虽然电路中有可以复用的部分(Garget)，但是每个Problem/Computation/Function都要构造新的电路。
 - 对于通用计算问题，构造出来的电路需要的gate数量可能是惊人的高。这意味着ZK-Rollup可能需要非常长的时间来生成Proof。
 - 对于目前EVM架构下的某些计算问题，生成其电路是非常困难的。
+- *附1* 对于Groth16，每个新的电路，都需要一次Setup，成本非常高。
 
 前两个问题属于General的ZK-SNARKs应用都会遇到的问题，目前已经有一些的研究人员/公司正在尝试解决这个问题。比如AleoHQ的创始人Howard Wu提出的[DIZK](https://www.usenix.org/conference/usenixsecurity18/presentation/wu)通过分布式的Cluster来并发计算Proof，以及Scroll的创始人[Zhang Ye](https://twitter.com/yezhang1998)，提出的[PipeZK](https://www.microsoft.com/en-us/research/publication/pipezk-accelerating-zero-knowledge-proof-with-a-pipelined-architecture/)通过ASIC来加速ZK计算。
 
-对于第三个问题，属于Ethereum中的专有的问题，也是目前zk-Rollup实现中最难，最需要攻克的问题。我们知道在Ethereum中，一条调用合约Function的Transaction的执行是基于/通过EVM的来执行的。EVM会将Transaction中的函数调用，基于合约代码，转换成opcodes的形式，保存在Stack中逐条执行。这个过程类似于编译过程中的IR代码生成，或者高级语言到汇编语言的过程。在执行这些opcodes时，本质上是在执行geth中对应的库函数，部分细节可以参考之前的[blog](http://www.hsyodyssey.com/blockchain/2021/07/25/ethereum_txn.html)。那么如果我们想把一个Transaction的合约调用转换成一个电路的话，本质上我们就要基于这个函数调用过程中执行过的opcodes来生成电路。目前的问题是，EVM在设计的时候并没有考虑到将来会被ZK-SNARKs这一问题，所以在它包含的140个opcode中有些是难以构造电路的。
+对于第三个问题，属于Ethereum中的专有的问题，也是目前zk-Rollup实现中最难，最需要攻克的问题。我们知道在Ethereum中，一条调用合约Function的Transaction的执行是基于/通过EVM的来执行的。EVM会将Transaction中的函数调用，基于合约代码，转换成opcodes的形式，保存在Stack中逐条执行。这个过程类似于编译过程中的IR代码生成，或者高级语言到汇编语言的过程。在执行这些opcodes时，本质上是在执行geth中对应的库函数，部分细节可以参考之前的[blog](http://www.hsyodyssey.com/blockchain/2021/07/25/ethereum_txn.html)。那么如果我们想把一个Transaction的合约调用转换成一个电路的话，本质上我们就要基于这个函数调用过程中执行过的opcodes来生成电路。目前的问题是，EVM在设计的时候并没有考虑到将来会被ZK-SNARKs化这一问题。所以，我们不得不面对现实，即EVM中的140个opcode中有些是难以构造电路的。同时Ehereum中大量使用的Keccek256哈希算法，和RLP编码都给构造电路带来了巨大的挑战。
 
 结果就是，在目前的ZK-Rollup的解决方案中，大部分**仅支持基础的转账操作**，而**不能支持**通用的图灵完备的计算。也就是说，目前的ZK-Rollup的解决方案都是不完整的，不能完整的发挥Ethereum图灵完备合约的特性，Layer-2又回到了仅支持Token转账的时代。
 
@@ -50,7 +53,7 @@ ZK-Rollup核心是利用了Zero-Knowledge Proof的技术来实现rollup。ZKP里
 
 ### 构建兼容EVM的zkEVM
 
-这种方案好处在于，开发人员可以继续使用solidity来构建智能合约。如何构造电路，完全交给底层的ZK-EVM来完成。ZK-EVM和现有的EVM是完全兼容的，现有的Ethereum Contract都可以直接移植到Layer-2上来使用。这种方案对现有的以太坊生态圈非常的友好，社区的合约开发人员在开发时，不需要学习什么额外的新知识，零门槛上手。
+这种方案好处在于，开发人员可以继续使用Solidity来构建智能合约。如何构造电路，完全交给底层的ZK-EVM来完成。ZK-EVM和现有的EVM是完全兼容的，现有的Ethereum Contract都可以直接移植到Layer-2上来使用。这种方案对现有的以太坊生态圈非常的友好，社区的合约开发人员在开发时，不需要学习什么额外的新知识，零门槛上手。
 
 这种方案的难点在于如何把现有的EVM, OPcode抽象成电路。目前正在研究这个路线的有下面两个团队，Scroll和Polygon Hermez。
 
@@ -65,7 +68,7 @@ ZK-Rollup核心是利用了Zero-Knowledge Proof的技术来实现rollup。ZKP里
 
 这种方案完全甩开了EVM的包袱，重新设计对ZK友好的VM以及对应的Programming Language。由于没有了包袱，所以这种方案开发起来比较快，目前进展最快的应该是StareWare团队开发的Cairo语言。
 
-但是基于这种解决方案Zk-Rollup，不能在Layer-2上直接使用Layer-1上已经编写好的Solidity合约。需要合约开发人员重新学习一门新的语言来重新编写合约。
+但是基于这种解决方案Zk-Rollup，不能在Layer-2上直接使用Layer-1上已经编写好的Solidity合约。需要合约开发人员重新学习一门新的语言来重新编写合约。或者会将Solidity转译成另一种语言，但是可能有些语法无法兼容。
 
 - **StareWare**
   - General
@@ -113,3 +116,5 @@ ZK-Rollup核心是利用了Zero-Knowledge Proof的技术来实现rollup。ZKP里
 
 - EIP-1559: Fee market change for ETH 1.0 chain, [[link]](https://eips.ethereum.org/EIPS/eip-1559)
 - gnark zk-SNARK library (go), [[Codebase]](https://github.com/ConsenSys/gnark)
+- A specification for a ZK-EVM, [[link]](https://ethresear.ch/t/a-zk-evm-specification/11549)
+- zkEVM, Zhang Ye, [[link]](https://hackmd.io/@yezhang/S1_KMMbGt)

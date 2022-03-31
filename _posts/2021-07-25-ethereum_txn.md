@@ -1,6 +1,6 @@
 ---
 layout: article
-title:  "一个Ethereum Transaction的生老病死"
+title:  "以太坊源码分析: 一个Ethereum Transaction的生老病死"
 date:   2021-07-25 10:00:00 +0800
 tags: Blockchain Ethereum Go
 categories: Blockchain
@@ -9,17 +9,19 @@ categories: Blockchain
 
 ## 概述
 
+在[Account章节](http://www.hsyodyssey.com/blockchain/2021/10/13/ethereum-account.html)的开头，我们提到了，Ethereum的运行依赖于基于交易的状态机模型(Transaction-based State Machine)。本章我们就来探索一下，Ethereum中的另一个基本数据单元Transaction。在本文中，我们提到的交易指的是在Ethereum Layer-1层面上构造的交易，以太坊生态中的Layer-2中的交易不在我们的讨论中。
+
 Transaction是Ethereum执行数据操作的媒介。它主要起到下面的几个作用:
 
-1. 在主网络上的Account之间进行Native Token的转账。
+1. 在Layer-1网络上的Account之间进行Native Token的转账。
 2. 创建新的Contract。
-3. 调用Contract中会修改Contract持久化数据或者修改其他Account/Contract数据的函数。
+3. 调用Contract中会修改目标Contract中持久化数据或者间接修改其他Account/Contract数据的函数。
 
-这里我们对Transaction功能性的细节再进行额外的补充说明。首先，Transaction只能创建Contract，而不能用于创建外部账户(EOA)。其次，关于Transaction的第三个作用我们使用了很长的定语进行说明，这里是为了强调，如果调用的Contract函数只进行了查询的操作，是不需要构造依赖Transaction的。总结下来，所有参与Account/Contract数据修改的操作都需要通过Transaction来进行。第三，Transaction只能由外部账户(EOA)构建，Contract是没办法构交易的。
+这里我们对Transaction功能性的细节再进行额外的补充说明。首先，Transaction只能创建Contract账户，而不能用于创建外部账户(EOA)。其次，关于Transaction的第三个作用我们使用了很长的定语进行说明，这里是为了强调，如果调用的Contract函数只进行了查询的操作，是不需要构造依赖Transaction的。总结下来，所有参与Account/Contract数据修改的操作都需要通过Transaction来进行。第三，广义上的Transaction只能由外部账户(EOA)构建。Contract是没有办法显式构造Layer-1层面的交易的。在某些合约函数的执行过程中，Contract在可以通过构造internal transaction来与其他的合约进行交互，但是这种Internal transaction与我们提到的Layer-1层面的交易有所不同，我们会在之后的章节介绍。
 
 ## LegacyTx & AccessListTX & DynamicFeeTx
 
-下面我们根据源代码中的定义来了解一下Transaction具体的数据结构的定义，了解其包含的相关变量。
+下面我们根据源代码中的Transaction的定义来了解一下Transaction的数据结构。Transaction结构体的定义位于*core/types/transaction.go*中。Transaction的结构体如下所示。
 
 ```go
 type Transaction struct {
@@ -32,6 +34,10 @@ type Transaction struct {
  from atomic.Value
 }
 ```
+
+从代码定义中我们可以看到，Transaction的结构体是非常简单的结构，它只包含了五个变量分别是, `TxData`类型的inner，`Time`类型的time，以及三个`atomic.Value`类型的hash，size，以及from。这里我们需要重点关注一下`inner`这个变量。目前与Transaction直接相关的数据大部分都保存在了这个变量总。
+
+目前，`TxData`类型是一个接口，它的定义如下面的代码所示。
 
 ```go
 type TxData interface {
@@ -111,16 +117,16 @@ type DynamicFeeTx struct {
 }
 ```
 
-## Transaction是如何被打包并修改Blockchain中的值的
+## Transaction修改合约中的值的
 
-Transaction用于更新一个或多个Account的State的。Miner负责将一个或多个Transaction被打包到一个block中，并按照顺序执行他们。顺序执行的结构会被finalise成一个新的World State。这个过程成为World State的状态转移。
+一个Transaction的执行，可以更新一个或多个Account的State的。Miner负责将一个或多个Transaction被打包到一个block中，并按照顺序执行他们。顺序执行的结构会被finalise成一个新的World State，并最终被保存到World State Trie中。这个过程成为World State的状态转移。
 
-在Ethereum中，当Miner开始构造新的区块的时候，首先会启动 "miner/worker.go的 mainLoop()"函数。
+在Ethereum中，当Miner开始构造新的区块的时候，首先会启动*miner/worker.go*的 `mainLoop()`函数。具体的函数如下所示。
 
 ```go
 func (w *worker) mainLoop() {
     ....
-    // 用于接受挖矿奖励
+    // 设置接受该区块中挖矿奖励的账户地址
     coinbase := w.coinbase
     w.mu.RUnlock()
 
@@ -129,6 +135,7 @@ func (w *worker) mainLoop() {
         acc, _ := types.Sender(w.current.signer, tx)
         txs[acc] = append(txs[acc], tx)
     }
+    // 这里看到，通过NewTransactionsByPriceAndNonce获取一部分的Tx并打包
     txset := types.NewTransactionsByPriceAndNonce(w.current.signer, txs, w.current.header.BaseFee)
     tcount := w.current.tcount
     //提交打包任务
@@ -137,7 +144,10 @@ func (w *worker) mainLoop() {
 }
 ```
 
-首先Worker会从TransactionPool中拿出若干的transaction, 赋值给*txs*, 然后按照Price和Nonce对*txs*进行排序，并将结果赋值给*txset*。在拿到*txset*之后，mainLoop函数会调用"miner/worker.go的commitTransactions()"函数。
+在Mining新区块前，Worker首先需要决定，那些Transaction会被打包到新的Block中。这里选取Transaction其实经历了两个步骤。首先，`txs`变量保存了从Transaction Pool中拿去到的合法的，以及准备好被打包的交易。这里举一个例子，来说明什么是**准备好被打包的交易**，比如Alice先后发了新三个交易到网络中，对应的Nonce分别是100和101，102。假如Miner只收到了100和102号交易。那么对于此刻的Transaction Pool来说Nonce 100的交易就是**准备好被打包的交易**，交易Nonce 是102需要等待Nonce 101的交易被确认之后才能提交。
+
+在Worker会从Transaction Pool中拿出若干的transaction, 赋值给*txs*之后, 然后调用`NewTransactionsByPriceAndNonce`函数按照Gas Price和Nonce对*txs*进行排序，并将结果赋值给*txset*。在拿到*txset*之后，mainLoop函数会调用`commitTransactions`函数，正式进入Mining新区块的流程。`commitTransactions`函数如下所示。
+
 
 ```go
 func (w *worker) commitTransactions(txs *types.TransactionsByPriceAndNonce, coinbase common.Address, interrupt *int32) bool {
@@ -168,7 +178,7 @@ func (w *worker) commitTransactions(txs *types.TransactionsByPriceAndNonce, coin
 }
 ```
 
-commitTransactions()函数的主体是一个for循环，每次获取结构体切片头部的txs.Peek()的transaction，并作为参数调用函数miner/worker.go的commitTransaction()。
+`commitTransactions`函数的主体是一个for循环，每次获取结构体切片头部的txs.Peek()的transaction，并作为参数调用函数miner/worker.go的`commitTransaction()`。`commitTransaction()`函数如下所示。
 
 ```go
 func (w *worker) commitTransaction(tx *types.Transaction, coinbase common.Address) ([]*types.Log, error){
@@ -221,19 +231,6 @@ func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) (*ExecutionResult, erro
 之后调用core/state_transition.go/TransitionDb()函数。
 
 ```go
-// TransitionDb will transition the state by applying the current message and
-// returning the evm execution result with following fields.
-//
-// - used gas:
-//      total gas used (including gas being refunded)
-// - returndata:
-//      the returned data from evm
-// - concrete execution error:
-//      various **EVM** error which aborts the execution,
-//      e.g. ErrOutOfGas, ErrExecutionReverted
-//
-// However if any consensus issue encountered, return the error directly with
-// nil evm execution result.
 func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
     ....
     ret, st.gas, vmerr = st.evm.Call(sender, st.to(), st.data, st.gas, st.value)
@@ -274,9 +271,9 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 }
 ```
 
-更细粒度的对每个opcode循环调用core/vm/jump_table.go中的execute函数。这里值得一提的是，获取Contract中每条Operate的方式，是从Contact中的code数组中按照第n个拿取。
+在更细粒度的对每个opcode循环调用core/vm/jump_table.go中的execute函数。这里值得一提的是，获取Contract中每条Operate的方式，是从Contact中的code数组中按照第n个拿取。
 
-```golang
+```go
 // GetOp returns the n'th element in the contract's byte array
 func (c *Contract) GetOp(n uint64) OpCode {
  return OpCode(c.GetByte(n))
@@ -292,7 +289,7 @@ func (c *Contract) GetByte(n uint64) byte {
 }
 ```
 
-每个OPCODE的具体实现在core/vm/instructor.go中。比如对Contract中持久化数据修改的OPSSTORE指令的实现位于opStore()函数中。
+OPCODE的具体实现代码位于core/vm/instructor.go文件中。比如，对Contract中持久化数据修改的OPSSTORE指令的实现位于opStore()函数中。而opStore的函数的具体操作又是调用了StateDB中的SetState函数，将Go-ethereum中的几个主要的模块串联了起来。
 
 ```go
 func opSstore(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
@@ -312,7 +309,7 @@ func (s *StateDB) SetState(addr common.Address, key, value common.Hash) {
 }
 ```
 
-综上，自顶向下的Transaction修改StateDB的Workflow如下所示。
+ 这样就完成了，一个新区块的形成过程中，Transaction如何修改StateDB的Workflow。
 
 - commitTransactions ->> commitTransaction ->> ApplyTransaction ->> applyTransaction ->>  ApplyMessage ->> TransactionDB ->> Call  ->> Run ->> opSstore ->> StateDB ->> StateObject ->> Key-Value-Trie
 
