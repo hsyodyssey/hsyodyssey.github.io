@@ -56,9 +56,9 @@ Blockchain 系统在设计层面借鉴了很多数据库系统中的设计逻辑
 
 ### PART ONE - General Source Code Analysis: Basic Components
 
-- [00_万物的起点从geth出发: Basic Geth]
-- [01_State-based 模型 & Account](http://www.hsyodyssey.com/blockchain/2021/10/13/ethereum-account.html)
-- [02_Transaction: 一个Transaction的生老病死](http://www.hsyodyssey.com/blockchain/2021/07/25/ethereum_txn.html)
+- [00_万物的起点: Geth Start](http://www.hsyodyssey.com/blockchain/2022/01/02/geth.html)
+- [01_State-based 模型 & Account](http://www.hsyodyssey.com/blockchain/2022/01/02/ethereum-account.html)
+- [02_Transaction: 一个Transaction的生老病死](http://www.hsyodyssey.com/blockchain/2022/01/03/ethereum_txn.html)
 - [03_从Block到Blockchain: 区块链数据结构的构建]
 - [04_一个新节点是怎么加入网络并同步区块的]
 - [05_一个网吧老板是怎么用闲置的电脑进行挖矿的]
