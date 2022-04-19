@@ -1,6 +1,6 @@
 ---
 layout: article
-title:  "理解以太坊Go-Ethereum 源码剖析(03): 一个Ethereum Transaction的生老病死"
+title:  "理解以太坊Go-Ethereum 源码剖析(02): 一个Ethereum Transaction的生老病死"
 date:   2022-01-03 10:00:00 +0800
 tags: Blockchain Ethereum Go
 categories: Blockchain
