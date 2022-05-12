@@ -1,10 +1,10 @@
 <!DOCTYPE html><html lang="en">
   <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Understanding Ethereum(Go version)｜理解以太坊(Go 版本源码剖析) - Tech Notes | HSY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Understanding Ethereum: Starting with go-ethereum Source Code｜理解以太坊: Go-Ethereum 源码剖析 - Tech Notes | HSY</title>
 
 <meta name="description" content="PrefaceBackground距中本聪发表比特币白皮书至今已经过了十几年的时光。Blockchain这一理念，从最开始作为支持Bitcoin的分布式账本系统出发，在这十几年的演化中不断发展，从专注于加密货币到如今的逐渐通用化，逐渐成为了集成了包括数据库，分布式系统，点对点网络，编译原理，静态软件分析，众包，密...">
-<link rel="canonical" href="http://localhost:4000/blockchain/2022/01/01/understand-ethereum.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
+<link rel="canonical" href="http://www.hsyodyssey.com/blockchain/2022/01/01/understand-ethereum.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -298,11 +298,11 @@
               <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
 
 <!-- end custom main top snippet -->
-<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>Understanding Ethereum(Go version)｜理解以太坊(Go 版本源码剖析)</h1></header><span class="split-space">&nbsp;</span>
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>Understanding Ethereum: Starting with go-ethereum Source Code｜理解以太坊: Go-Ethereum 源码剖析</h1></header><span class="split-space">&nbsp;</span>
           <a class="edit-on-github"
             title="Edit on Github"
             href="https://github.com/hsyodyssey/hsyodyssey.github.io/tree/main/_posts/2022-1-1-understand-ethereum.md">
-            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="Understanding Ethereum(Go version)｜理解以太坊(Go 版本源码剖析)"><div class="article__info clearfix"><ul class="left-col menu"><li>
+            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="Understanding Ethereum: Starting with go-ethereum Source Code｜理解以太坊: Go-Ethereum 源码剖析"><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Blockchain">Blockchain</a>
             </li><li>
@@ -376,9 +376,9 @@
 <h3 id="part-one---general-source-code-analysis-basic-components">PART ONE - General Source Code Analysis: Basic Components</h3>
 
 <ul>
-  <li>[00_万物的起点从geth出发: Basic Geth]</li>
-  <li><a href="http://www.hsyodyssey.com/blockchain/2021/10/13/ethereum-account.html">01_State-based 模型 &amp; Account</a></li>
-  <li><a href="http://www.hsyodyssey.com/blockchain/2021/07/25/ethereum_txn.html">02_Transaction: 一个Transaction的生老病死</a></li>
+  <li><a href="http://www.hsyodyssey.com/blockchain/2022/01/02/geth.html">00_万物的起点: Geth Start</a></li>
+  <li><a href="http://www.hsyodyssey.com/blockchain/2022/01/02/ethereum-account.html">01_State-based 模型 &amp; Account</a></li>
+  <li><a href="http://www.hsyodyssey.com/blockchain/2022/01/03/ethereum_txn.html">02_Transaction: 一个Transaction的生老病死</a></li>
   <li>[03_从Block到Blockchain: 区块链数据结构的构建]</li>
   <li>[04_一个新节点是怎么加入网络并同步区块的]</li>
   <li>[05_一个网吧老板是怎么用闲置的电脑进行挖矿的]</li>
@@ -555,7 +555,7 @@
       </a>
     </p>
   </div></div></footer>
-<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/working/2021/11/13/How_to_be_a_good_Division_Commander.html">[Re]怎样当好一名师长</a></div><div class="next"><span>NEXT</span><a href="/blockchain/2022/02/02/rollup_and_ZKVM.html">Rollup/zk-Rollup以及zkVM/zkEVM</a></div></div></div>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/working/2021/11/13/How_to_be_a_good_Division_Commander.html">[Re]怎样当好一名师长</a></div><div class="next"><span>NEXT</span><a href="/blockchain/2022/01/02/geth.html">理解以太坊Go-Ethereum 源码剖析(00): 万物的起点: Geth Start !</a></div></div></div>
 
 </div>
 

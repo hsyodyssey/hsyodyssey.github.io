@@ -5,7 +5,7 @@
 
 <meta name="description" content="Researching and Thinking
 ">
-<link rel="canonical" href="http://localhost:4000/"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
+<link rel="canonical" href="http://www.hsyodyssey.com/"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
 
 <meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-config" content="/assets/browserconfig.xml">
 
@@ -299,19 +299,38 @@
 
 <!-- end custom main top snippet -->
 <article itemscope itemtype="http://schema.org/WebPage"><header style="display:none;"><h1>Home</h1></header><meta itemprop="headline" content="Home"><meta itemprop="author" content="Siyuan Han"/><div class="js-article-content"><div class="layout--articles"><div class="article-list items items--divided"><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
+          <header><a href="/python/selenium/2022/05/10/selenium.html"><h2 itemprop="headline" class="item__header">如何使用Selenium来下载PDF文件</h2></a></header>
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">如何使用Selenium来下载PDF？
+
+今天帮老婆写了个爬虫，遇到了这么一个问题: 需要从某个页面上下载一个PDF文件，但是不管怎么搞，PDF文件都会在Chrome内打开，而不是另存为或者下载。搜了一圈，发现不管中英文的结果都是如何把一个html页面保存成PDF。大概是有将页面保存成PDF的需求的人更多。
+
+这里分享一下结论，希望能帮助到遇到之后相同问题的开发人员:
+
+
+  在创建chromedriver的时候，同时传入一个webdriver.chrome.options.Options, 如下:
+
+
+    options = webdriver.chrome.options.Options()
+    # 这里是自定义的下载文件夹地址
+    download_dir = "" ...</div><p><a href="/python/selenium/2022/05/10/selenium.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Blockchain">Blockchain</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=ZKP">ZKP</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Groth16">Groth16</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>May 10, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-05-10T10:00:00+08:00">
+    <meta itemprop="keywords" content="Blockchain,ZKP,Groth16"></div>
+      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
           <header><a href="/zk-snark/2022/03/22/groth16.html"><h2 itemprop="headline" class="item__header">理解Groth16，一些细节上的说明</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">V神曾经写过一篇非常好的介绍R1CS与QAP问题的文章。但是，对于不熟悉密码学的，或者说如何使用密码学的思想来解决问题的票友们来说，文章中的一些逻辑上的跨度还是大了一些。尤其是在R1CS转换成多项式形式的地方，初次接触的人可能会一脸懵逼。下面我就从我的理解来谈一谈，从R1CS到QAP这一过程。
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">Thanks to Zhang Ye, Peng Jingshu for review.
 
-在Groth16的流程中，我们首先需要把计算问题拍平成电路。电路由若干的有输入有输出的算数电路门组成。然后根据电路门，来构造R1CS约束。
+V神曾经写过一篇非常好的介绍R1CS与QAP问题的文章。但是，对于不熟悉密码学的，或者说如何使用密码学的思想来解决问题的票友们来说，文章中的一些逻辑上的跨度还是大了一些。尤其是在R1CS转换成多项式的地方，初次接触的人可能会一脸懵逼，不明白为什么要这么做。下面我就从我的理解来谈一谈，从R1CS到QAP这一过程。
 
-这里我们直接使用V神的博客中的例子。下面的三个矩阵是就是原问题对应的电路的R1CS的约束矩阵。
-
-A
-[0, 1, 0, 0, 0, 0]
-[0, 0, 0, 1, 0, 0]
-[0, 1, 0, 0, 1, 0]
-[5, 0, 0, 0, 0, 1]
-...</div><p><a href="/zk-snark/2022/03/22/groth16.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+在Groth16的流程中，我们首先需要把计算问题拍平成电路的形式。在这一步骤中，我们会将原始的计算问题，解构成电路的形式(Circuit)。这个电路和原始的计算问题是等价。电路由若干的有输入有输出的算数电路门(Gate)组成。通常情况下，这些电路门都是由两个输入变量，一个输出变量组成。...</div><p><a href="/zk-snark/2022/03/22/groth16.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
               <a class="button button--secondary button--pill button--sm"
                 href="/archive.html?tag=Blockchain">Blockchain</a>
             </li><li>
@@ -361,7 +380,68 @@ A
             </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-02-02T10:00:00+08:00">
     <meta itemprop="keywords" content="Blockchain,Ethereum,ZKP,Layer-2,Rollup,zk-Rollup"></div>
       </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/blockchain/2022/01/01/understand-ethereum.html"><h2 itemprop="headline" class="item__header">Understanding Ethereum(Go version)｜理解以太坊(Go 版本源码剖析)</h2></a></header>
+          <header><a href="/blockchain/2022/01/03/ethereum_txn.html"><h2 itemprop="headline" class="item__header">理解以太坊Go-Ethereum 源码剖析(02): 一个Ethereum Transaction的生老病死</h2></a></header>
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">概述
+
+在Account章节的开头，我们提到了，Ethereum的运行依赖于基于交易的状态机模型(Transaction-based State Machine)。本章我们就来探索一下，Ethereum中的另一个基本数据单元Transaction。在本文中，我们提到的交易指的是在Ethereum Layer-1层面上构造的交易，以太坊生态中的Layer-2中的交易不在我们的讨论中。
+
+Transaction是Ethereum执行数据操作的媒介。它主要起到下面的几个作用:
+
+
+  在Layer-1网络上的Account之间进行Native Token的转账。
+  创建新的Contract。
+  调用Contract中会修改目标Contract中持久化数据或者间接修改其他Account/C...</div><p><a href="/blockchain/2022/01/03/ethereum_txn.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Blockchain">Blockchain</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Ethereum">Ethereum</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Go">Go</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Jan 03, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-01-03T10:00:00+08:00">
+    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
+      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
+          <header><a href="/blockchain/2022/01/02/ethereum-account.html"><h2 itemprop="headline" class="item__header">理解以太坊Go-Ethereum 源码剖析(01): 账户与合约(Account and Contract)</h2></a></header>
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">概述
+
+我们常常听到这么一个说法，“Ethereum和Bitcoin最大的不同之一是，Ethereum是基于Account模型的Blockchain系统，而Bitcoin是基于UTXO模型的”。那么，这个另辟蹊径的Account模型究竟不同在何处呢？在本文中我们来探索一下以太坊中的基本数据单元(Metadata)之一的Account。
+
+我们知道，Ethereum的运行依赖于基于交易的状态机模型(Transaction-based State Machine)。其中，状态(State)指的是数据变量在某一时刻下的信息。承载State的数据变量，称之为StateObject。当StateObject的数据或信息发生了变化时，我们称为状态转移。在Ethereum的运行模型中，StateOb...</div><p><a href="/blockchain/2022/01/02/ethereum-account.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Blockchain">Blockchain</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Ethereum">Ethereum</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Go">Go</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Jan 02, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-01-02T11:00:00+08:00">
+    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
+      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
+          <header><a href="/blockchain/2022/01/02/geth.html"><h2 itemprop="headline" class="item__header">理解以太坊Go-Ethereum 源码剖析(00): 万物的起点: Geth Start !</h2></a></header>
+          <div class="item__description"><div class="article__content" itemprop="description articleBody">什么是Geth？
+
+Geth是基于Go语言开发以太坊的客户端，它实现了Ethereum协议(黄皮书)中所有需要的实现的功能模块，包括状态管理，挖矿，P2P网络通信，密码学，数据库，EVM解释器等。我们可以通过启动Geth来运行一个Ethereum的节点。Go-ethereum是包含了Geth在内的一个代码库，它包含了Geth，以及编译Geth所需要的其他代码。在本系列中，我们会深入Go-ethereum代码库，从High-level的API接口出发，沿着Ethereum主Workflow，从而理解Ethereum具体实现的细节。
+
+Go-ethereum Codebase 结构
+
+为了更好的从整体工作流的角度来理解Ethereum，根据主要的业务功能，我们将go-ethereum划分成...</div><p><a href="/blockchain/2022/01/02/geth.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Blockchain">Blockchain</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Ethereum">Ethereum</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Go">Go</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Jan 02, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-01-02T10:00:00+08:00">
+    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
+      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
+          <header><a href="/blockchain/2022/01/01/understand-ethereum.html"><h2 itemprop="headline" class="item__header">Understanding Ethereum: Starting with go-ethereum Source Code｜理解以太坊: Go-Ethereum 源码剖析</h2></a></header>
           <div class="item__description"><div class="article__content" itemprop="description articleBody">Preface
 
 Background
@@ -380,92 +460,20 @@ Background
             </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Jan 01, 2022</span>
             </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-01-01T10:00:00+08:00">
     <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/working/2021/11/13/How_to_be_a_good_Division_Commander.html"><h2 itemprop="headline" class="item__header">[Re]怎样当好一名师长</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">怎样当好一名师长(Author:林彪)
-
-一、要勤快
-
-不勤快的人办不好事情，不能当好军事指挥员。应该自己干的事情一定要亲自过目，亲自动手。比如，应该上去看的山头就要爬上去，应该了解的情况就要及时了解，应该检查的问题就要严格检查。不能懒，军事指挥员切忌懒，因为懒会带来危险，带来失败。比方说，一个军事指挥员，到了宿营地就进房子，搞水洗脸洗脚，搞鸡蛋煮面吃，吃饱了就睡大觉。他对住的村子有多大，在什么位置，附近有几个山头周围有几条道路，敌情怎么样，群众条件怎么样，可能发生什么情况，部队到齐了没有，哨位在什么地方，发生紧急情况时的处置预案如何，都不过问，都不知道。这样，如果半夜三更发生了情况，敌人来个突然袭击，就没有办法了。到那种时候，即使平时很勇敢的指挥员，也会束手无策，只好三十六计，跑为上...</div><p><a href="/working/2021/11/13/How_to_be_a_good_Division_Commander.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Working">Working</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Nov 13, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-11-13T10:00:00+08:00">
-    <meta itemprop="keywords" content="Working"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/blockchain/2021/10/13/ethereum-account.html"><h2 itemprop="headline" class="item__header">以太坊源码分析: 账户与合约(Account and Contract)</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">Account数据结构分析
-
-Background
-
-在本文中我们来探索一下以太坊中的基本数据元(Metadata)之一的Account。
-
-我们知道，Ethereum是基于交易的状态机模型(Transaction-based State Machine)来运行的。在这种模型中，State基于Transaction的执行引发的数据更新/删除/创建，而转移到另一个State。具体的说，Transaction的执行会让系统元对象(Meta Object)的数据值发生改变，表现为系统元对象从一个状态转换到另一个状态。在Ethereum中，这个元对象就是Account。State表现(represent)出来的是Account在某个时刻的包含/对应的数据的值。
-
-
-  Account –&gt...</div><p><a href="/blockchain/2021/10/13/ethereum-account.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Blockchain">Blockchain</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Ethereum">Ethereum</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Go">Go</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Oct 13, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-10-13T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/blockchain/2021/10/10/golang.html"><h2 itemprop="headline" class="item__header">Go语言开发Tips</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">Introduction
-
-This repo records the daily programming nodes of Golang.
-
-Why Golang?
-
-Golang是一种非常适合分布式系统/数据库(Distributed System/database)，区块链(Blockchain)项目开发的编程语言，因为:
-
-
-  语法简单。它学习曲线平滑。有其他高级语言编程经验的开发人员，可以快速上手。
-  高并发基因。它提供了强大简洁易用稳定的标准库，对高并发，分布式程序有更加灵活简洁全面的标准库支持。不需要依赖第三方库就可以快速构建后端/网络/高并发应用。
-  跨平台。它支持跨系统交叉编译。MacOS/Win 也可以编译Linux下可以运行的程序，不需要担心环境依赖的问题。...</div><p><a href="/blockchain/2021/10/10/golang.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Blockchain">Blockchain</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Ethereum">Ethereum</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Go">Go</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Oct 10, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-10-10T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
-      </article><article class="item" itemscope itemtype="http://schema.org/BlogPosting"><div class="item__content">
-          <header><a href="/blockchain/2021/07/25/ethereum_txn.html"><h2 itemprop="headline" class="item__header">一个Ethereum Transaction的生老病死</h2></a></header>
-          <div class="item__description"><div class="article__content" itemprop="description articleBody">概述
-
-Transaction是Ethereum执行数据操作的媒介。它主要起到下面的几个作用:
-
-
-  在主网络上的Account之间进行Native Token的转账。
-  创建新的Contract。
-  调用Contract中会修改Contract持久化数据或者修改其他Account/Contract数据的函数。
-
-
-这里我们对Transaction功能性的细节再进行额外的补充说明。首先，Transaction只能创建Contract，而不能用于创建外部账户(EOA)。其次，关于Transaction的第三个作用我们使用了很长的定语进行说明，这里是为了强调，如果调用的Contract函数只进行了查询的操作，是不需要构造依赖Transaction的。总结下来，所有参与Account/...</div><p><a href="/blockchain/2021/07/25/ethereum_txn.html">Read more</a></p></div><div class="article__info clearfix"><ul class="left-col menu"><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Blockchain">Blockchain</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Ethereum">Ethereum</a>
-            </li><li>
-              <a class="button button--secondary button--pill button--sm"
-                href="/archive.html?tag=Go">Go</a>
-            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Jul 25, 2021</span>
-            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2021-07-25T10:00:00+08:00">
-    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"></div>
       </article></div>
-</div><div class="layout--home"></div>
+</div><div class="layout--home"><div class="pagination"><p>10 post articles, 2 pages.</p>
+    <div class="pagination__menu">
+      <ul class="menu menu--nowrap"><li><div class="button button--secondary button--circle disabled">
+            <i class="fas fa-angle-left"></i>
+          </div></li><li>
+              <div class="button button--primary button--circle focus"><span>1</span></div>
+            </li><li>
+                <a class="button button--secondary button--circle" href="/page2"><span>2</span></a>
+              </li><li><a class="button button--secondary button--circle" href="/page2">
+            <i class="fas fa-angle-right"></i>
+          </a></li></ul>
+    </div>
+  </div></div>
 <script>/*(function () {
 
 })();*/

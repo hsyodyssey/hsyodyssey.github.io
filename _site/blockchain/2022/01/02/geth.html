@@ -1,0 +1,1302 @@
+<!DOCTYPE html><html lang="en">
+  <head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>理解以太坊Go-Ethereum 源码剖析(00): 万物的起点: Geth Start ! - Tech Notes | HSY</title>
+
+<meta name="description" content="什么是Geth？Geth是基于Go语言开发以太坊的客户端，它实现了Ethereum协议(黄皮书)中所有需要的实现的功能模块，包括状态管理，挖矿，P2P网络通信，密码学，数据库，EVM解释器等。我们可以通过启动Geth来运行一个Ethereum的节点。Go-ethereum是包含了Geth在内的一个代码库，它包含了...">
+<link rel="canonical" href="http://www.hsyodyssey.com/blockchain/2022/01/02/geth.html"><link rel="alternate" type="application/rss+xml" title="Tech Notes | HSY" href="/feed.xml"><!-- start favicons snippet, use https://realfavicongenerator.net/ --><link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png"><link rel="manifest" href="/assets/site.webmanifest"><link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#fc4d50"><link rel="shortcut icon" href="/assets/favicon.ico">
+
+<meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-config" content="/assets/browserconfig.xml">
+
+<meta name="theme-color" content="#ffffff">
+<!-- end favicons snippet -->
+
+<!-- 
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff"> --><link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.css" >
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      inlineMath: [['$','$']]
+      }
+  });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><!-- start custom head snippets -->
+
+<!-- end custom head snippets -->
+<script>(function() {
+  window.isArray = function(val) {
+    return Object.prototype.toString.call(val) === '[object Array]';
+  };
+  window.isString = function(val) {
+    return typeof val === 'string';
+  };
+
+  window.hasEvent = function(event) {
+    return 'on'.concat(event) in window.document;
+  };
+
+  window.isOverallScroller = function(node) {
+    return node === document.documentElement || node === document.body || node === window;
+  };
+
+  window.isFormElement = function(node) {
+    var tagName = node.tagName;
+    return tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA';
+  };
+
+  window.pageLoad = (function () {
+    var loaded = false, cbs = [];
+    window.addEventListener('load', function () {
+      var i;
+      loaded = true;
+      if (cbs.length > 0) {
+        for (i = 0; i < cbs.length; i++) {
+          cbs[i]();
+        }
+      }
+    });
+    return {
+      then: function(cb) {
+        cb && (loaded ? cb() : (cbs.push(cb)));
+      }
+    };
+  })();
+})();
+(function() {
+  window.throttle = function(func, wait) {
+    var args, result, thisArg, timeoutId, lastCalled = 0;
+
+    function trailingCall() {
+      lastCalled = new Date;
+      timeoutId = null;
+      result = func.apply(thisArg, args);
+    }
+    return function() {
+      var now = new Date,
+        remaining = wait - (now - lastCalled);
+
+      args = arguments;
+      thisArg = this;
+
+      if (remaining <= 0) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+        lastCalled = now;
+        result = func.apply(thisArg, args);
+      } else if (!timeoutId) {
+        timeoutId = setTimeout(trailingCall, remaining);
+      }
+      return result;
+    };
+  };
+})();
+(function() {
+  var Set = (function() {
+    var add = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (data[i] === item) {
+          return;
+        }
+      }
+      this.size ++;
+      data.push(item);
+      return data;
+    };
+
+    var Set = function(data) {
+      this.size = 0;
+      this._data = [];
+      var i;
+      if (data.length > 0) {
+        for (i = 0; i < data.length; i++) {
+          add.call(this, data[i]);
+        }
+      }
+    };
+    Set.prototype.add = add;
+    Set.prototype.get = function(index) { return this._data[index]; };
+    Set.prototype.has = function(item) {
+      var i, data = this._data;
+      for (i = 0; i < data.length; i++) {
+        if (this.get(i) === item) {
+          return true;
+        }
+      }
+      return false;
+    };
+    Set.prototype.is = function(map) {
+      if (map._data.length !== this._data.length) { return false; }
+      var i, j, flag, tData = this._data, mData = map._data;
+      for (i = 0; i < tData.length; i++) {
+        for (flag = false, j = 0; j < mData.length; j++) {
+          if (tData[i] === mData[j]) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) { return false; }
+      }
+      return true;
+    };
+    Set.prototype.values = function() {
+      return this._data;
+    };
+    return Set;
+  })();
+
+  window.Lazyload = (function(doc) {
+    var queue = {js: [], css: []}, sources = {js: {}, css: {}}, context = this;
+    var createNode = function(name, attrs) {
+      var node = doc.createElement(name), attr;
+      for (attr in attrs) {
+        if (attrs.hasOwnProperty(attr)) {
+          node.setAttribute(attr, attrs[attr]);
+        }
+      }
+      return node;
+    };
+    var end = function(type, url) {
+      var s, q, qi, cbs, i, j, cur, val, flag;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        s[url] = true;
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (cur.urls.has(url)) {
+            qi = cur, val = qi.urls.values();
+            qi && (cbs = qi.callbacks);
+            for (flag = true, j = 0; j < val.length; j++) {
+              cur = val[j];
+              if (!s[cur]) {
+                flag = false;
+              }
+            }
+            if (flag && cbs && cbs.length > 0) {
+              for (j = 0; j < cbs.length; j++) {
+                cbs[j].call(context);
+              }
+              qi.load = true;
+            }
+          }
+        }
+      }
+    };
+    var load = function(type, urls, callback) {
+      var s, q, qi, node, i, cur,
+        _urls = typeof urls === 'string' ? new Set([urls]) : new Set(urls), val, url;
+      if (type === 'js' || type ==='css') {
+        s = sources[type], q = queue[type];
+        for (i = 0; i < q.length; i++) {
+          cur = q[i];
+          if (_urls.is(cur.urls)) {
+            qi = cur;
+            break;
+          }
+        }
+        val = _urls.values();
+        if (qi) {
+          callback && (qi.load || qi.callbacks.push(callback));
+          callback && (qi.load && callback());
+        } else {
+          q.push({
+            urls: _urls,
+            callbacks: callback ? [callback] : [],
+            load: false
+          });
+          for (i = 0; i < val.length; i++) {
+            node = null, url = val[i];
+            if (s[url] === undefined) {
+              (type === 'js' ) && (node = createNode('script', { src: url }));
+              (type === 'css') && (node = createNode('link', { rel: 'stylesheet', href: url }));
+              if (node) {
+                node.onload = (function(type, url) {
+                  return function() {
+                    end(type, url);
+                  };
+                })(type, url);
+                (doc.head || doc.body).appendChild(node);
+                s[url] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+    return {
+      js: function(url, callback) {
+        load('js', url, callback);
+      },
+      css: function(url, callback) {
+        load('css', url, callback);
+      }
+    };
+  })(this.document);
+})();
+</script><script>
+  (function() {
+    var TEXT_VARIABLES = {
+      version: '2.2.6',
+      sources: {
+        font_awesome: 'https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.css',
+        jquery: 'https://cdn.bootcss.com/jquery/3.1.1/jquery.min.js',
+        leancloud_js_sdk: '//cdn.jsdelivr.net/npm/leancloud-storage@3.13.2/dist/av-min.js',
+        chart: 'https://cdn.bootcss.com/Chart.js/2.7.2/Chart.bundle.min.js',
+        gitalk: {
+          js: 'https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js',
+          css: 'https://unpkg.com/gitalk/dist/gitalk.css'
+        },
+        valine: 'https://unpkg.com/valine/dist/Valine.min.js',
+        mathjax: 'https://cdn.bootcss.com/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML',
+        mermaid: 'https://cdn.bootcss.com/mermaid/8.0.0-rc.8/mermaid.min.js'
+      },
+      site: {
+        toc: {
+          selectors: 'h1,h2,h3'
+        }
+      },
+      paths: {
+        search_js: '/assets/search.js'
+      }
+    };
+    window.TEXT_VARIABLES = TEXT_VARIABLES;
+  })();
+</script>
+</head>
+  <body>
+    <div class="root" data-is-touch="false">
+      <div class="layout--page js-page-root"><div class="page__main js-page-main page__viewport has-aside cell cell--auto">
+
+      <div class="page__main-inner"><div class="page__header d-print-none"><header class="header"><div class="main">
+      <div class="header__title">
+        <div class="header__brand"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="24px" height="24px" viewBox="0 0 24 24">
+<style type="text/css">
+	.st0{fill:#515151;}
+</style>
+<path class="st0" d="M1.7,22.3c5.7-5.7,11.3-5.7,17,0c3.3-3.3,3.5-5.3,0.8-6c2.7,0.7,3.5-1.1,2.3-5.6s-3.3-5.2-6.3-2.1
+	c3-3,2.3-5.2-2.1-6.3S7,1.8,7.7,4.6C7,1.8,5,2.1,1.7,5.3C7.3,11,7.3,16.7,1.7,22.3"/>
+</svg>
+<a title="Researching and Thinking
+" href="/">Tech Notes | HSY</a></div><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></div><nav class="navigation">
+        <ul><li class="navigation__item"><a href="/archive.html">Archive</a></li><li class="navigation__item"><a href="/about.html">About</a></li><li class="navigation__item"><a href="/reading.html">Reading</a></li><li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li></ul>
+      </nav></div>
+  </header>
+</div><div class="page__content"><div class ="main"><div class="grid grid--reverse">
+
+              <div class="col-aside d-print-none js-col-aside"><aside class="page__aside js-page-aside"><div class="toc-aside js-toc-root"></div>
+</aside></div>
+
+              <div class="col-main cell cell--auto"><!-- start custom main top snippet -->
+
+<!-- end custom main top snippet -->
+<article itemscope itemtype="http://schema.org/Article"><div class="article__header"><header><h1>理解以太坊Go-Ethereum 源码剖析(00): 万物的起点: Geth Start !</h1></header><span class="split-space">&nbsp;</span>
+          <a class="edit-on-github"
+            title="Edit on Github"
+            href="https://github.com/hsyodyssey/hsyodyssey.github.io/tree/main/_posts/2022-1-2-geth.md">
+            <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="理解以太坊Go-Ethereum 源码剖析(00): 万物的起点: Geth Start !"><div class="article__info clearfix"><ul class="left-col menu"><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Blockchain">Blockchain</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Ethereum">Ethereum</a>
+            </li><li>
+              <a class="button button--secondary button--pill button--sm"
+                href="/archive.html?tag=Go">Go</a>
+            </li></ul><ul class="right-col menu"><li><i class="far fa-calendar-alt"></i> <span>Jan 02, 2022</span>
+            </li></ul></div><meta itemprop="author" content="Siyuan Han"/><meta itemprop="datePublished" content="2022-01-02T10:00:00+08:00">
+    <meta itemprop="keywords" content="Blockchain,Ethereum,Go"><div class="js-article-content"><div class="layout--article"><!-- start custom article top snippet -->
+
+<!-- end custom article top snippet -->
+<div class="article__content" itemprop="articleBody"><h2 id="什么是geth">什么是Geth？</h2>
+
+<p>Geth是基于Go语言开发以太坊的客户端，它实现了Ethereum协议(黄皮书)中所有需要的实现的功能模块，包括状态管理，挖矿，P2P网络通信，密码学，数据库，EVM解释器等。我们可以通过启动Geth来运行一个Ethereum的节点。Go-ethereum是包含了Geth在内的一个代码库，它包含了Geth，以及编译Geth所需要的其他代码。在本系列中，我们会深入Go-ethereum代码库，从High-level的API接口出发，沿着Ethereum主Workflow，从而理解Ethereum具体实现的细节。</p>
+
+<h3 id="go-ethereum-codebase-结构">Go-ethereum Codebase 结构</h3>
+
+<p>为了更好的从整体工作流的角度来理解Ethereum，根据主要的业务功能，我们将go-ethereum划分成如下几个模块来分析。</p>
+
+<ul>
+  <li>Geth Client模块</li>
+  <li>Core数据结构模块</li>
+  <li>State Management模块
+    <ul>
+      <li>StateDB 模块</li>
+      <li>Trie 模块</li>
+      <li>State Optimization (Pruning)</li>
+    </ul>
+  </li>
+  <li>Mining模块</li>
+  <li>EVM 模块</li>
+  <li>P2P 网络模块
+    <ul>
+      <li>节点数据同步</li>
+    </ul>
+  </li>
+  <li>…</li>
+</ul>
+
+<p>目前，go-ethereum项目的主要目录结构如下所示:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmd/ ethereum相关的Command-line程序。该目录下的每个子目录都包含一个可运行的main.go。
+   |── clef/ Ethereum官方推出的Account管理程序.
+   |── geth/ Geth的本体。
+core/   以太坊核心模块，包括核心数据结构，statedb，EVM等算法实现
+   |── rawdb/ db相关函数的高层封装(在ethdb和更底层的leveldb之上的封装)
+   |── state/
+       ├──statedb.go  StateDB结构用于存储所有的与Merkle trie相关的存储, 包括一些循环state结构  
+   |── types/  包括Block在内的以太坊核心数据结构
+      |── block.go  以太坊block
+      |── bloom9.go  一个Bloom Filter的实现
+      |── transaction.go 以太坊transaction的数据结构与实现
+      |── transaction_signing.go 用于对transaction进行签名的函数的实现
+      |── receipt.go  以太坊收据的实现，用于说明以太坊交易的结果
+   |── vm/
+   |── genesis.go     创世区块相关的函数，在每个geth初始化的都需要调用这个模块
+   |── tx_pool.go     Ethereum Transaction Pool的实现
+consensus/
+   |── consensus.go   共识相关的参数设定，包括Block Reward的数量
+console/
+   |── bridge.go
+   |── console.go  Geth Web3 控制台的入口
+ethdb/    Ethereum 本地存储的相关实现, 包括leveldb的调用
+   |── leveldb/   Go-Ethereum使用的与Bitcoin Core version一样的Leveldb作为本机存储用的数据库
+miner/
+   |── miner.go   矿工模块的实现。
+   |── worker.go  真正的block generation的实现实现，包括打包transaction，计算合法的Block
+p2p/     Ethereum 的P2P模块
+   |── params    Ethereum 的一些参数的配置，例如: bootnode的enode地址
+   |── bootnodes.go  bootnode的enode地址 like: aws的一些节点，azure的一些节点，Ethereum Foundation的节点和 Rinkeby测试网的节点
+rlp/     RLP的Encode与Decode的相关
+rpc/     Ethereum RPC客户端的实现
+les/     Ethereum light client的实现
+trie/    Ethereum 中至关重要的数据结构 Merkle Patrica Trie(MPT)的实现
+   |── committer.go    Trie向Memory Database提交数据的工具函数。
+   |── database.go     Memory Database，是Trie数据和Disk Database提交的中间层。同时还实现了Trie剪枝的功能。**非常重要**
+   |── node.go         MPT中的节点的定义以及相关的函数。
+   |── secure_trie.go  基于Trie的封装的Trie结构。与trie中的函数功能相同，不过secure_trie中的key是经过hashKey()函数hash过的，无法通过路径获得原始的key值
+   |── stack_trie.go   Block中使用的Transaction/Receipt Trie的实现
+   |── trie.go         MPT具体功能的函数实现
+</code></pre></div></div>
+
+<h2 id="geth-start">Geth Start</h2>
+
+<h3 id="前奏-geth-console">前奏: Geth Console</h3>
+
+<p>当我们想要部署一个Ethereum节点的时候，最直接的方式就是下载官方提供的发行版的geth程序。Geth是一个基于CLI的应用，启动Geth和调用Geth的功能性API需要使用对应的指令来操作。Geth提供了一个相对友好的console来方便用户调用各种指令。当我第一次阅读Ethereum的文档的时候，我曾经有过这样的疑问，为什么Geth是由Go语言编写的，但是在官方文档中的Web3的API却是基于Javascript的调用？</p>
+
+<p>这是因为Geth内置了一个Javascript的解释器:å<em>Goja</em> (interpreter)，来作为用户与Geth交互的CLI Console。我们可以在<code class="language-plaintext highlighter-rouge">console/console.go</code>中找到它的定义。</p>
+
+<!-- /*Goja is an implementation of ECMAScript 5.1 in Pure GO*/ -->
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Console is a JavaScript interpreted runtime environment. It is a fully fledged</span>
+<span class="c">// JavaScript console attached to a running node via an external or in-process RPC</span>
+<span class="c">// client.</span>
+<span class="k">type</span> <span class="n">Console</span> <span class="k">struct</span> <span class="p">{</span>
+ <span class="n">client</span>   <span class="o">*</span><span class="n">rpc</span><span class="o">.</span><span class="n">Client</span>         <span class="c">// RPC client to execute Ethereum requests through</span>
+ <span class="n">jsre</span>     <span class="o">*</span><span class="n">jsre</span><span class="o">.</span><span class="n">JSRE</span>          <span class="c">// JavaScript runtime environment running the interpreter</span>
+ <span class="n">prompt</span>   <span class="kt">string</span>              <span class="c">// Input prompt prefix string</span>
+ <span class="n">prompter</span> <span class="n">prompt</span><span class="o">.</span><span class="n">UserPrompter</span> <span class="c">// Input prompter to allow interactive user feedback</span>
+ <span class="n">histPath</span> <span class="kt">string</span>              <span class="c">// Absolute path to the console scrollback history</span>
+ <span class="n">history</span>  <span class="p">[]</span><span class="kt">string</span>            <span class="c">// Scroll history maintained by the console</span>
+ <span class="n">printer</span>  <span class="n">io</span><span class="o">.</span><span class="n">Writer</span>           <span class="c">// Output writer to serialize any display strings to</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="启动">启动</h3>
+
+<p>了解Ethereum，我们首先要了解Ethereum客户端Geth是怎么运行的。</p>
+
+<p><!-- `geth console 2` --></p>
+
+<p>Geth的启动点位于<code class="language-plaintext highlighter-rouge">cmd/geth/main.go/main()</code>函数处，如下所示。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+ <span class="k">if</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">app</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Args</span><span class="p">);</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+  <span class="n">fmt</span><span class="o">.</span><span class="n">Fprintln</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Stderr</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+  <span class="n">os</span><span class="o">.</span><span class="n">Exit</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
+ <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>我们可以看到<code class="language-plaintext highlighter-rouge">main()</code>函数非常的简短，其主要功能就是启动一个解析 command line命令的工具: <code class="language-plaintext highlighter-rouge">gopkg.in/urfave/cli.v1</code>。我们会发现在cli app初始化的时候会调用<code class="language-plaintext highlighter-rouge">app.Action = geth</code>，来调用<code class="language-plaintext highlighter-rouge">geth()</code>函数。<code class="language-plaintext highlighter-rouge">geth()</code>函数就是用于启动Ethereum节点的顶层函数，其代码如下所示。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">geth</span><span class="p">(</span><span class="n">ctx</span> <span class="o">*</span><span class="n">cli</span><span class="o">.</span><span class="n">Context</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+ <span class="k">if</span> <span class="n">args</span> <span class="o">:=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">Args</span><span class="p">();</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="m">0</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Errorf</span><span class="p">(</span><span class="s">"invalid command: %q"</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="m">0</span><span class="p">])</span>
+ <span class="p">}</span>
+
+ <span class="n">prepare</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+ <span class="n">stack</span><span class="p">,</span> <span class="n">backend</span> <span class="o">:=</span> <span class="n">makeFullNode</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+ <span class="k">defer</span> <span class="n">stack</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+
+ <span class="n">startNode</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="no">false</span><span class="p">)</span>
+ <span class="n">stack</span><span class="o">.</span><span class="n">Wait</span><span class="p">()</span>
+ <span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>在<code class="language-plaintext highlighter-rouge">geth()</code>函数，我们可以看到有三个比较重要的函数调用，分别是：<code class="language-plaintext highlighter-rouge">prepare()</code>，<code class="language-plaintext highlighter-rouge">makeFullNode()</code>，以及<code class="language-plaintext highlighter-rouge">startNode()</code>。</p>
+
+<p><code class="language-plaintext highlighter-rouge">prepare()</code> 函数的实现就在当前的<code class="language-plaintext highlighter-rouge">main.go</code>文件中。它主要用于设置一些节点初始化需要的配置。比如，我们在节点启动时看到的这句话: <em>Starting Geth on Ethereum mainnet…</em> 就是在<code class="language-plaintext highlighter-rouge">prepare()</code>函数中被打印出来的。</p>
+
+<p><code class="language-plaintext highlighter-rouge">makeFullNode()</code>函数的实现位于<code class="language-plaintext highlighter-rouge">cmd/geth/config.go</code>文件中。它会将Geth启动时的命令的上下文加载到配置中，并生成<code class="language-plaintext highlighter-rouge">stack</code>和<code class="language-plaintext highlighter-rouge">backend</code>这两个实例。其中<code class="language-plaintext highlighter-rouge">stack</code>是一个Node类型的实例，它是通过<code class="language-plaintext highlighter-rouge">makeFullNode()</code>函数调用<code class="language-plaintext highlighter-rouge">makeConfigNode()</code>函数来生成。Node是Geth生命周期中最顶级的实例，它的开启和关闭与Geth的启动和关闭直接对应。关于Node类型的定义位于<code class="language-plaintext highlighter-rouge">node/node.go</code>文件中。</p>
+
+<p><code class="language-plaintext highlighter-rouge">backend</code>实例是指的是具体Ethereum Client的功能性实例。它是一个Ethereum类型的实例，负责提供更为具体的以太坊的功能性Service，比如管理Blockchain，共识算法等具体模块。它根据上下文的配置信息在调用<code class="language-plaintext highlighter-rouge">utils.RegisterEthService()</code>函数生成。在<code class="language-plaintext highlighter-rouge">utils.RegisterEthService()</code>函数中，首先会根据当前的config来判断需要生成的Ethereum backend的类型，是light node backend还是full node backend。我们可以在<code class="language-plaintext highlighter-rouge">eth/backend/new()</code>函数和<code class="language-plaintext highlighter-rouge">les/client.go/new()</code>中找到这两种Ethereum backend的实例是如何初始化的。Ethereum backend的实例定义了一些更底层的配置，比如chainid，链使用的共识算法的类型等。这两种后端服务的一个典型的区别是light node backend不能启动Mining服务。在<code class="language-plaintext highlighter-rouge">utils.RegisterEthService()</code>函数的最后，调用了<code class="language-plaintext highlighter-rouge">Nodes.RegisterAPIs()</code>函数，将刚刚生成的backend实例注册到<code class="language-plaintext highlighter-rouge">stack</code>实例中。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">eth</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="n">Ethereum</span><span class="p">{</span>
+  <span class="n">config</span><span class="o">:</span>            <span class="n">config</span><span class="p">,</span>
+  <span class="n">merger</span><span class="o">:</span>            <span class="n">merger</span><span class="p">,</span>
+  <span class="n">chainDb</span><span class="o">:</span>           <span class="n">chainDb</span><span class="p">,</span>
+  <span class="n">eventMux</span><span class="o">:</span>          <span class="n">stack</span><span class="o">.</span><span class="n">EventMux</span><span class="p">(),</span>
+  <span class="n">accountManager</span><span class="o">:</span>    <span class="n">stack</span><span class="o">.</span><span class="n">AccountManager</span><span class="p">(),</span>
+  <span class="n">engine</span><span class="o">:</span>            <span class="n">ethconfig</span><span class="o">.</span><span class="n">CreateConsensusEngine</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">chainConfig</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ethashConfig</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">Miner</span><span class="o">.</span><span class="n">Notify</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">Miner</span><span class="o">.</span><span class="n">Noverify</span><span class="p">,</span> <span class="n">chainDb</span><span class="p">),</span>
+  <span class="n">closeBloomHandler</span><span class="o">:</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="k">struct</span><span class="p">{}),</span>
+  <span class="n">networkID</span><span class="o">:</span>         <span class="n">config</span><span class="o">.</span><span class="n">NetworkId</span><span class="p">,</span>
+  <span class="n">gasPrice</span><span class="o">:</span>          <span class="n">config</span><span class="o">.</span><span class="n">Miner</span><span class="o">.</span><span class="n">GasPrice</span><span class="p">,</span>
+  <span class="n">etherbase</span><span class="o">:</span>         <span class="n">config</span><span class="o">.</span><span class="n">Miner</span><span class="o">.</span><span class="n">Etherbase</span><span class="p">,</span>
+  <span class="n">bloomRequests</span><span class="o">:</span>     <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="k">chan</span> <span class="o">*</span><span class="n">bloombits</span><span class="o">.</span><span class="n">Retrieval</span><span class="p">),</span>
+  <span class="n">bloomIndexer</span><span class="o">:</span>      <span class="n">core</span><span class="o">.</span><span class="n">NewBloomIndexer</span><span class="p">(</span><span class="n">chainDb</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">BloomBitsBlocks</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">BloomConfirms</span><span class="p">),</span>
+  <span class="n">p2pServer</span><span class="o">:</span>         <span class="n">stack</span><span class="o">.</span><span class="n">Server</span><span class="p">(),</span>
+  <span class="n">shutdownTracker</span><span class="o">:</span>   <span class="n">shutdowncheck</span><span class="o">.</span><span class="n">NewShutdownTracker</span><span class="p">(</span><span class="n">chainDb</span><span class="p">),</span>
+ <span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">startNode()</code>函数的作用是正式的启动一个Ethereum Node。它通过调用<code class="language-plaintext highlighter-rouge">utils.StartNode()</code>函数来触发<code class="language-plaintext highlighter-rouge">Node.Start()</code>函数来启动<code class="language-plaintext highlighter-rouge">Stack</code>实例（Node）。在<code class="language-plaintext highlighter-rouge">Node.Start()</code>函数中，会遍历<code class="language-plaintext highlighter-rouge">Node.lifecycles</code>中注册的后端实例，并在启动它们。此外，在<code class="language-plaintext highlighter-rouge">startNode()</code>函数中，还是调用了<code class="language-plaintext highlighter-rouge">unlockAccounts()</code>函数，并将解锁的钱包注册到<code class="language-plaintext highlighter-rouge">stack</code>中，以及通过<code class="language-plaintext highlighter-rouge">stack.Attach()</code>函数创建了与local Geth交互的RPClient模块。</p>
+
+<p>在<code class="language-plaintext highlighter-rouge">geth()</code>函数的最后，函数通过执行<code class="language-plaintext highlighter-rouge">stack.Wait()</code>，使得主线程进入了监听状态，其他的功能模块的服务被分散到其他的子协程中进行维护。</p>
+
+<h3 id="node">Node</h3>
+
+<p>正如我们前面提到的，Node类型在Geth的生命周期性中属于顶级实例，它负责作为与外部通信的外部接口，比如管理rpc server，http server，Web Socket，以及P2P Server外部接口。同时，Node中维护了节点运行所需要的后端的实例和服务(<code class="language-plaintext highlighter-rouge">lifecycles  []Lifecycle</code>)。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Node is a container on which services can be registered.</span>
+<span class="k">type</span> <span class="n">Node</span> <span class="k">struct</span> <span class="p">{</span>
+ <span class="n">eventmux</span>      <span class="o">*</span><span class="n">event</span><span class="o">.</span><span class="n">TypeMux</span>
+ <span class="n">config</span>        <span class="o">*</span><span class="n">Config</span>
+ <span class="n">accman</span>        <span class="o">*</span><span class="n">accounts</span><span class="o">.</span><span class="n">Manager</span>
+ <span class="n">log</span>           <span class="n">log</span><span class="o">.</span><span class="n">Logger</span>
+ <span class="n">keyDir</span>        <span class="kt">string</span>            <span class="c">// key store directory</span>
+ <span class="n">keyDirTemp</span>    <span class="kt">bool</span>              <span class="c">// If true, key directory will be removed by Stop</span>
+ <span class="n">dirLock</span>       <span class="n">fileutil</span><span class="o">.</span><span class="n">Releaser</span> <span class="c">// prevents concurrent use of instance directory</span>
+ <span class="n">stop</span>          <span class="k">chan</span> <span class="k">struct</span><span class="p">{}</span>     <span class="c">// Channel to wait for termination notifications</span>
+ <span class="n">server</span>        <span class="o">*</span><span class="n">p2p</span><span class="o">.</span><span class="n">Server</span>       <span class="c">// Currently running P2P networking layer</span>
+ <span class="n">startStopLock</span> <span class="n">sync</span><span class="o">.</span><span class="n">Mutex</span>        <span class="c">// Start/Stop are protected by an additional lock</span>
+ <span class="n">state</span>         <span class="kt">int</span>               <span class="c">// Tracks state of node lifecycle</span>
+
+ <span class="n">lock</span>          <span class="n">sync</span><span class="o">.</span><span class="n">Mutex</span>
+ <span class="n">lifecycles</span>    <span class="p">[]</span><span class="n">Lifecycle</span> <span class="c">// All registered backends, services, and auxiliary services that have a lifecycle</span>
+ <span class="n">rpcAPIs</span>       <span class="p">[]</span><span class="n">rpc</span><span class="o">.</span><span class="n">API</span>   <span class="c">// List of APIs currently provided by the node</span>
+ <span class="n">http</span>          <span class="o">*</span><span class="n">httpServer</span> <span class="c">//</span>
+ <span class="n">ws</span>            <span class="o">*</span><span class="n">httpServer</span> <span class="c">//</span>
+ <span class="n">httpAuth</span>      <span class="o">*</span><span class="n">httpServer</span> <span class="c">//</span>
+ <span class="n">wsAuth</span>        <span class="o">*</span><span class="n">httpServer</span> <span class="c">//</span>
+ <span class="n">ipc</span>           <span class="o">*</span><span class="n">ipcServer</span>  <span class="c">// Stores information about the ipc http server</span>
+ <span class="n">inprocHandler</span> <span class="o">*</span><span class="n">rpc</span><span class="o">.</span><span class="n">Server</span> <span class="c">// In-process RPC request handler to process the API requests</span>
+
+ <span class="n">databases</span> <span class="k">map</span><span class="p">[</span><span class="o">*</span><span class="n">closeTrackingDB</span><span class="p">]</span><span class="k">struct</span><span class="p">{}</span> <span class="c">// All open databases</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="ethereum-api-backend">Ethereum API Backend</h3>
+
+<p>我们可以在<code class="language-plaintext highlighter-rouge">eth/backend.go</code>中找到<code class="language-plaintext highlighter-rouge">Ethereum</code>这个结构体的定义。这个结构体包含的成员变量以及接收的方法实现了一个Ethereum full node所需要的全部功能和数据结构。我们可以在下面的代码定义中看到，Ethereum结构体中包含了<code class="language-plaintext highlighter-rouge">TxPool</code>，<code class="language-plaintext highlighter-rouge">Blockchain</code>，<code class="language-plaintext highlighter-rouge">consensus.Engine</code>，<code class="language-plaintext highlighter-rouge">miner</code>等最核心的几个数据结构作为成员变量，我们会在后面的章节中详细的讲述这些核心数据结构的主要功能，以及它们的实现的方法。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Ethereum implements the Ethereum full node service.</span>
+<span class="k">type</span> <span class="n">Ethereum</span> <span class="k">struct</span> <span class="p">{</span>
+ <span class="n">config</span> <span class="o">*</span><span class="n">ethconfig</span><span class="o">.</span><span class="n">Config</span>
+
+ <span class="c">// Handlers</span>
+ <span class="n">txPool</span>             <span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">TxPool</span>
+ <span class="n">blockchain</span>         <span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">BlockChain</span>
+ <span class="n">handler</span>            <span class="o">*</span><span class="n">handler</span>
+ <span class="n">ethDialCandidates</span>  <span class="n">enode</span><span class="o">.</span><span class="n">Iterator</span>
+ <span class="n">snapDialCandidates</span> <span class="n">enode</span><span class="o">.</span><span class="n">Iterator</span>
+ <span class="n">merger</span>             <span class="o">*</span><span class="n">consensus</span><span class="o">.</span><span class="n">Merger</span>
+
+ <span class="c">// DB interfaces</span>
+ <span class="n">chainDb</span> <span class="n">ethdb</span><span class="o">.</span><span class="n">Database</span> <span class="c">// Block chain database</span>
+
+ <span class="n">eventMux</span>       <span class="o">*</span><span class="n">event</span><span class="o">.</span><span class="n">TypeMux</span>
+ <span class="n">engine</span>         <span class="n">consensus</span><span class="o">.</span><span class="n">Engine</span>
+ <span class="n">accountManager</span> <span class="o">*</span><span class="n">accounts</span><span class="o">.</span><span class="n">Manager</span>
+
+ <span class="n">bloomRequests</span>     <span class="k">chan</span> <span class="k">chan</span> <span class="o">*</span><span class="n">bloombits</span><span class="o">.</span><span class="n">Retrieval</span> <span class="c">// Channel receiving bloom data retrieval requests</span>
+ <span class="n">bloomIndexer</span>      <span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">ChainIndexer</span>             <span class="c">// Bloom indexer operating during block imports</span>
+ <span class="n">closeBloomHandler</span> <span class="k">chan</span> <span class="k">struct</span><span class="p">{}</span>
+
+ <span class="n">APIBackend</span> <span class="o">*</span><span class="n">EthAPIBackend</span>
+
+ <span class="n">miner</span>     <span class="o">*</span><span class="n">miner</span><span class="o">.</span><span class="n">Miner</span>
+ <span class="n">gasPrice</span>  <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span>
+ <span class="n">etherbase</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span>
+
+ <span class="n">networkID</span>     <span class="kt">uint64</span>
+ <span class="n">netRPCService</span> <span class="o">*</span><span class="n">ethapi</span><span class="o">.</span><span class="n">PublicNetAPI</span>
+
+ <span class="n">p2pServer</span> <span class="o">*</span><span class="n">p2p</span><span class="o">.</span><span class="n">Server</span>
+
+ <span class="n">lock</span> <span class="n">sync</span><span class="o">.</span><span class="n">RWMutex</span> <span class="c">// Protects the variadic fields (e.g. gas price and etherbase)</span>
+
+ <span class="n">shutdownTracker</span> <span class="o">*</span><span class="n">shutdowncheck</span><span class="o">.</span><span class="n">ShutdownTracker</span> <span class="c">// Tracks if and when the node has shutdown ungracefully</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>节点启动和停止Mining的就是通过调用<code class="language-plaintext highlighter-rouge">Ethereum.StartMining()</code>和<code class="language-plaintext highlighter-rouge">Ethereum.StopMining()</code>实现的。设置Mining的收益账户是通过调用<code class="language-plaintext highlighter-rouge">Ethereum.SetEtherbase()</code>实现的。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// StartMining starts the miner with the given number of CPU threads. If mining</span>
+<span class="c">// is already running, this method adjust the number of threads allowed to use</span>
+<span class="c">// and updates the minimum price required by the transaction pool.</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span><span class="n">Ethereum</span><span class="p">)</span> <span class="n">StartMining</span><span class="p">(</span><span class="n">threads</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+   <span class="o">...</span>
+ <span class="c">// If the miner was not running, initialize it</span>
+ <span class="k">if</span> <span class="o">!</span><span class="n">s</span><span class="o">.</span><span class="n">IsMining</span><span class="p">()</span> <span class="p">{</span>
+      <span class="o">...</span>
+      <span class="c">// Start Mining</span>
+  <span class="k">go</span> <span class="n">s</span><span class="o">.</span><span class="n">miner</span><span class="o">.</span><span class="n">Start</span><span class="p">(</span><span class="n">eb</span><span class="p">)</span>
+ <span class="p">}</span>
+ <span class="k">return</span> <span class="no">nil</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里我们额外关注一下<code class="language-plaintext highlighter-rouge">handler</code>这个成员变量。<code class="language-plaintext highlighter-rouge">handler</code>的定义在<code class="language-plaintext highlighter-rouge">eth/handler.go</code>中。</p>
+
+<p>我们从从宏观角度来看，一个节点的主工作流需要: 1.从网络中获取/同步Transaction和Block的数据 2. 将网络中获取到Block添加到Blockchain中。而<code class="language-plaintext highlighter-rouge">handler</code>就维护了backend中同步/请求数据的实例，比如<code class="language-plaintext highlighter-rouge">downloader.Downloader</code>，<code class="language-plaintext highlighter-rouge">fetcher.TxFetcher</code>。关于这些成员变量的具体实现，我们会在后续的文章中详细介绍。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">handler</span> <span class="k">struct</span> <span class="p">{</span>
+ <span class="n">networkID</span>  <span class="kt">uint64</span>
+ <span class="n">forkFilter</span> <span class="n">forkid</span><span class="o">.</span><span class="n">Filter</span> <span class="c">// Fork ID filter, constant across the lifetime of the node</span>
+
+ <span class="n">snapSync</span>  <span class="kt">uint32</span> <span class="c">// Flag whether snap sync is enabled (gets disabled if we already have blocks)</span>
+ <span class="n">acceptTxs</span> <span class="kt">uint32</span> <span class="c">// Flag whether we're considered synchronised (enables transaction processing)</span>
+
+ <span class="n">checkpointNumber</span> <span class="kt">uint64</span>      <span class="c">// Block number for the sync progress validator to cross reference</span>
+ <span class="n">checkpointHash</span>   <span class="n">common</span><span class="o">.</span><span class="n">Hash</span> <span class="c">// Block hash for the sync progress validator to cross reference</span>
+
+ <span class="n">database</span> <span class="n">ethdb</span><span class="o">.</span><span class="n">Database</span>
+ <span class="n">txpool</span>   <span class="n">txPool</span>
+ <span class="n">chain</span>    <span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">BlockChain</span>
+ <span class="n">maxPeers</span> <span class="kt">int</span>
+
+ <span class="n">downloader</span>   <span class="o">*</span><span class="n">downloader</span><span class="o">.</span><span class="n">Downloader</span>
+ <span class="n">blockFetcher</span> <span class="o">*</span><span class="n">fetcher</span><span class="o">.</span><span class="n">BlockFetcher</span>
+ <span class="n">txFetcher</span>    <span class="o">*</span><span class="n">fetcher</span><span class="o">.</span><span class="n">TxFetcher</span>
+ <span class="n">peers</span>        <span class="o">*</span><span class="n">peerSet</span>
+ <span class="n">merger</span>       <span class="o">*</span><span class="n">consensus</span><span class="o">.</span><span class="n">Merger</span>
+
+ <span class="n">eventMux</span>      <span class="o">*</span><span class="n">event</span><span class="o">.</span><span class="n">TypeMux</span>
+ <span class="n">txsCh</span>         <span class="k">chan</span> <span class="n">core</span><span class="o">.</span><span class="n">NewTxsEvent</span>
+ <span class="n">txsSub</span>        <span class="n">event</span><span class="o">.</span><span class="n">Subscription</span>
+ <span class="n">minedBlockSub</span> <span class="o">*</span><span class="n">event</span><span class="o">.</span><span class="n">TypeMuxSubscription</span>
+
+ <span class="n">peerRequiredBlocks</span> <span class="k">map</span><span class="p">[</span><span class="kt">uint64</span><span class="p">]</span><span class="n">common</span><span class="o">.</span><span class="n">Hash</span>
+
+ <span class="c">// channels for fetcher, syncer, txsyncLoop</span>
+ <span class="n">quitSync</span> <span class="k">chan</span> <span class="k">struct</span><span class="p">{}</span>
+
+ <span class="n">chainSync</span> <span class="o">*</span><span class="n">chainSyncer</span>
+ <span class="n">wg</span>        <span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span>
+ <span class="n">peerWG</span>    <span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样，我们就介绍了Geth及其所需要的基本模块是如何启动的。我们在接下来将视角转入到各个模块中，从更细粒度的角度深入Ethereum的实现。</p>
+
+<h3 id="appendix">Appendix</h3>
+
+<p>这里补充一个Go语言的语法知识: <strong>类型断言</strong>。在<code class="language-plaintext highlighter-rouge">Ethereum.StartMining()</code>函数中，出现了<code class="language-plaintext highlighter-rouge">if c, ok := s.engine.(*clique.Clique); ok</code>的写法。这中写法是Golang中的语法糖，称为类型断言。具体的语法是<code class="language-plaintext highlighter-rouge">value, ok := element.(T)</code>，它的含义是如果<code class="language-plaintext highlighter-rouge">element</code>是<code class="language-plaintext highlighter-rouge">T</code>类型的话，那么ok等于<code class="language-plaintext highlighter-rouge">True</code>, <code class="language-plaintext highlighter-rouge">value</code>等于<code class="language-plaintext highlighter-rouge">element</code>的值。在<code class="language-plaintext highlighter-rouge">if c, ok := s.engine.(*clique.Clique); ok</code>语句中，就是在判断<code class="language-plaintext highlighter-rouge">s.engine</code>的是否为<code class="language-plaintext highlighter-rouge">*clique.Clique</code>类型。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">var</span> <span class="n">cli</span> <span class="o">*</span><span class="n">clique</span><span class="o">.</span><span class="n">Clique</span>
+  <span class="k">if</span> <span class="n">c</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="n">s</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="p">(</span><span class="o">*</span><span class="n">clique</span><span class="o">.</span><span class="n">Clique</span><span class="p">);</span> <span class="n">ok</span> <span class="p">{</span>
+   <span class="n">cli</span> <span class="o">=</span> <span class="n">c</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="n">cl</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="n">s</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="p">(</span><span class="o">*</span><span class="n">beacon</span><span class="o">.</span><span class="n">Beacon</span><span class="p">);</span> <span class="n">ok</span> <span class="p">{</span>
+   <span class="k">if</span> <span class="n">c</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="n">cl</span><span class="o">.</span><span class="n">InnerEngine</span><span class="p">()</span><span class="o">.</span><span class="p">(</span><span class="o">*</span><span class="n">clique</span><span class="o">.</span><span class="n">Clique</span><span class="p">);</span> <span class="n">ok</span> <span class="p">{</span>
+    <span class="n">cli</span> <span class="o">=</span> <span class="n">c</span>
+   <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+</div><section class="article__sharing d-print-none"></section><div class="d-print-none"><footer class="article__footer"><meta itemprop="dateModified" content="2022-01-02T10:00:00+08:00"><!-- start custom article footer snippet -->
+
+<!-- end custom article footer snippet -->
+<div class="article__subscribe"><div class="subscribe"><i class="fas fa-rss"></i> <a type="application/rss+xml" href="/feed.xml">Subscribe</a></div>
+</div><div class="article__license"><div class="license">
+    <p>This work is licensed under a <a itemprop="license" rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial 4.0 International</a> license.
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">
+        <img alt="Attribution-NonCommercial 4.0 International" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" />
+      </a>
+    </p>
+  </div></div></footer>
+<div class="article__section-navigator clearfix"><div class="previous"><span>PREVIOUS</span><a href="/blockchain/2022/01/01/understand-ethereum.html">Understanding Ethereum: Starting with go-ethereum Source Code｜理解以太坊: Go-Ethereum 源码剖析</a></div><div class="next"><span>NEXT</span><a href="/blockchain/2022/01/02/ethereum-account.html">理解以太坊Go-Ethereum 源码剖析(01): 账户与合约(Account and Contract)</a></div></div></div>
+
+</div>
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    $(function() {
+      var $this ,$scroll;
+      var $articleContent = $('.js-article-content');
+      var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+      var scroll = hasSidebar ? '.js-page-main' : 'html, body';
+      $scroll = $(scroll);
+
+      $articleContent.find('.highlight').each(function() {
+        $this = $(this);
+        $this.attr('data-lang', $this.find('code').attr('data-lang'));
+      });
+      $articleContent.find('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]').each(function() {
+        $this = $(this);
+        $this.append($('<a class="anchor d-print-none" aria-hidden="true"></a>').html('<i class="fas fa-anchor"></i>'));
+      });
+      $articleContent.on('click', '.anchor', function() {
+        $scroll.scrollToAnchor('#' + $(this).parent().attr('id'), 400);
+      });
+    });
+  });
+})();
+</script>
+</div><section class="page__comments d-print-none"></section></article><!-- start custom main bottom snippet -->
+
+<!-- end custom main bottom snippet -->
+</div>
+            </div></div></div><div class="page__footer d-print-none">
+<footer class="footer py-4 js-page-footer">
+  <div class="main"><div itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Siyuan Han"><meta itemprop="url" content="/"><meta itemprop="description" content="PhD Student/Database/Blockchain/Golang/Python/Java."><div class="footer__author-links"><div class="author-links">
+  <ul class="menu menu--nowrap menu--inline"><li title="Send me an Email.">
+      <a class="button button--circle mail-button" itemprop="email" href="mailto:shanaj@connect.ust.hk" target="_blank">
+        <i class="fas fa-envelope"></i>
+      </a><li title="Follow me on Twitter.">
+        <a class="button button--circle twitter-button" itemprop="sameAs" href="https://twitter.com/siyuanhanust" target="_blank">
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path d="M1024.032 194.432c-37.664 16.704-78.176 28-120.672 33.088 43.36-26.016 76.672-67.168 92.384-116.224-40.608 24.064-85.568 41.568-133.408 50.976-38.336-40.832-92.928-66.336-153.344-66.336-116.032 0-210.08 94.048-210.08 210.08 0 16.48 1.856 32.512 5.44 47.872-174.592-8.768-329.408-92.416-433.024-219.52-18.08 31.04-28.448 67.104-28.448 105.632 0 72.896 37.088 137.184 93.472 174.88-34.432-1.088-66.816-10.528-95.168-26.272-0.032 0.864-0.032 1.76-0.032 2.656 0 101.792 72.416 186.688 168.512 205.984-17.632 4.8-36.192 7.36-55.36 7.36-13.536 0-26.688-1.312-39.52-3.776 26.72 83.456 104.32 144.192 196.256 145.888-71.904 56.352-162.496 89.92-260.928 89.92-16.96 0-33.664-0.992-50.112-2.944 92.96 59.616 203.392 94.4 322.048 94.4 386.432 0 597.728-320.128 597.728-597.76 0-9.12-0.192-18.176-0.608-27.168 41.056-29.632 76.672-66.624 104.832-108.736z" />
+</svg>
+</div>
+        </a>
+      </li><li title="Follow me on Linkedin.">
+        <a class="button button--circle linkedin-button" itemprop="sameAs" href="https://www.linkedin.com/in/siyuanhan" target="_blank">
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path d="M260.096 155.648c0 27.307008-9.899008 50.516992-29.696 69.632-19.796992 19.115008-45.396992 28.672-76.8 28.672-30.036992 0-54.612992-9.556992-73.728-28.672-19.115008-19.115008-28.672-42.324992-28.672-69.632 0-28.672 9.556992-52.224 28.672-70.656 19.115008-18.432 44.372992-27.648 75.776-27.648 31.403008 0 56.32 9.216 74.752 27.648 18.432 18.432 28.331008 41.984 29.696 70.656 0 0 0 0 0 0m-202.752 808.96c0 0 0-632.832 0-632.832 0 0 196.608 0 196.608 0 0 0 0 632.832 0 632.832 0 0-196.608 0-196.608 0 0 0 0 0 0 0m313.344-430.08c0-58.708992-1.364992-126.292992-4.096-202.752 0 0 169.984 0 169.984 0 0 0 10.24 88.064 10.24 88.064 0 0 4.096 0 4.096 0 40.96-68.267008 105.812992-102.4 194.56-102.4 68.267008 0 123.220992 22.868992 164.864 68.608 41.643008 45.739008 62.464 113.664 62.464 203.776 0 0 0 374.784 0 374.784 0 0-196.608 0-196.608 0 0 0 0-350.208 0-350.208 0-91.476992-33.451008-137.216-100.352-137.216-47.787008 0-81.236992 24.576-100.352 73.728-4.096 8.192-6.144 24.576-6.144 49.152 0 0 0 364.544 0 364.544 0 0-198.656 0-198.656 0 0 0 0-430.08 0-430.08 0 0 0 0 0 0" />
+</svg>
+</div>
+        </a>
+      </li><li title="Follow me on Github.">
+        <a class="button button--circle github-button" itemprop="sameAs" href="https://github.com/hsyodyssey" target="_blank">
+          <div class="icon"><svg fill="#000000" width="24px" height="24px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path class="svgpath" data-index="path_0" fill="#272636" d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
+</svg>
+</div>
+        </a>
+      </li></ul>
+</div>
+</div>
+    </div><div class="site-info mt-2">
+      <div>© Tech Notes | HSY 2021,
+        Powered by <a title="Jekyll is a simple, blog-aware, static site generator." href="http://jekyllrb.com/">Jekyll</a> & <a
+        title="TeXt is a super customizable Jekyll theme." href="https://github.com/kitian616/jekyll-TeXt-theme">TeXt Theme</a>.
+      </div>
+    </div>
+  </div>
+</footer>
+</div></div>
+    </div><script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $body = $('body'), $window = $(window);
+    var $pageRoot = $('.js-page-root'), $pageMain = $('.js-page-main');
+    var activeCount = 0;
+    function modal(options) {
+      var $root = this, visible, onChange, hideWhenWindowScroll = false;
+      var scrollTop;
+      function setOptions(options) {
+        var _options = options || {};
+        visible = _options.initialVisible === undefined ? false : show;
+        onChange = _options.onChange;
+        hideWhenWindowScroll = _options.hideWhenWindowScroll;
+      }
+      function init() {
+        setState(visible);
+      }
+      function setState(isShow) {
+        if (isShow === visible) {
+          return;
+        }
+        visible = isShow;
+        if (visible) {
+          activeCount++;
+          scrollTop = $(window).scrollTop() || $pageMain.scrollTop();
+          $root.addClass('modal--show');
+          $pageMain.scrollTop(scrollTop);
+          activeCount === 1 && ($pageRoot.addClass('show-modal'), $body.addClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.on('scroll', hide);
+          $window.on('keyup', handleKeyup);
+        } else {
+          activeCount > 0 && activeCount--;
+          $root.removeClass('modal--show');
+          $window.scrollTop(scrollTop);
+          activeCount === 0 && ($pageRoot.removeClass('show-modal'), $body.removeClass('of-hidden'));
+          hideWhenWindowScroll && window.hasEvent('touchstart') && $window.off('scroll', hide);
+          $window.off('keyup', handleKeyup);
+        }
+        onChange && onChange(visible);
+      }
+      function show() {
+        setState(true);
+      }
+      function hide() {
+        setState(false);
+      }
+      function handleKeyup(e) {
+        // Char Code: 27  ESC
+        if (e.which ===  27) {
+          hide();
+        }
+      }
+      setOptions(options);
+      init();
+      return {
+        show: show,
+        hide: hide,
+        $el: $root
+      };
+    }
+    $.fn.modal = modal;
+  });
+})();
+</script><div class="modal modal--overflow page__search-modal d-print-none js-page-search-modal"><script>
+(function () {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    // search panel
+    var search = (window.search || (window.search = {}));
+    var useDefaultSearchBox = window.useDefaultSearchBox === undefined ?
+      true : window.useDefaultSearchBox ;
+
+    var $searchModal = $('.js-page-search-modal');
+    var $searchToggle = $('.js-search-toggle');
+    var searchModal = $searchModal.modal({ onChange: handleModalChange, hideWhenWindowScroll: true });
+    var modalVisible = false;
+    search.searchModal = searchModal;
+
+    var $searchBox = null;
+    var $searchInput = null;
+    var $searchClear = null;
+
+    function getModalVisible() {
+      return modalVisible;
+    }
+    search.getModalVisible = getModalVisible;
+
+    function handleModalChange(visible) {
+      modalVisible = visible;
+      if (visible) {
+        search.onShow && search.onShow();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].focus();
+      } else {
+        search.onShow && search.onHide();
+        useDefaultSearchBox && $searchInput[0] && $searchInput[0].blur();
+        setTimeout(function() {
+          useDefaultSearchBox && ($searchInput.val(''), $searchBox.removeClass('not-empty'));
+          search.clear && search.clear();
+          window.pageAsideAffix && window.pageAsideAffix.refresh();
+        }, 400);
+      }
+    }
+
+    $searchToggle.on('click', function() {
+      modalVisible ? searchModal.hide() : searchModal.show();
+    });
+    // Char Code: 83  S, 191 /
+    $(window).on('keyup', function(e) {
+      if (!modalVisible && !window.isFormElement(e.target || e.srcElement) && (e.which === 83 || e.which === 191)) {
+        modalVisible || searchModal.show();
+      }
+    });
+
+    if (useDefaultSearchBox) {
+      $searchBox = $('.js-search-box');
+      $searchInput = $searchBox.children('input');
+      $searchClear = $searchBox.children('.js-icon-clear');
+      search.getSearchInput = function() {
+        return $searchInput.get(0);
+      };
+      search.getVal = function() {
+        return $searchInput.val();
+      };
+      search.setVal = function(val) {
+        $searchInput.val(val);
+      };
+
+      $searchInput.on('focus', function() {
+        $(this).addClass('focus');
+      });
+      $searchInput.on('blur', function() {
+        $(this).removeClass('focus');
+      });
+      $searchInput.on('input', window.throttle(function() {
+        var val = $(this).val();
+        if (val === '' || typeof val !== 'string') {
+          search.clear && search.clear();
+        } else {
+          $searchBox.addClass('not-empty');
+          search.onInputNotEmpty && search.onInputNotEmpty(val);
+        }
+      }, 400));
+      $searchClear.on('click', function() {
+        $searchInput.val(''); $searchBox.removeClass('not-empty');
+        search.clear && search.clear();
+      });
+    }
+  });
+})();
+</script><div class="search search--dark">
+  <div class="main">
+    <div class="search__header">Search</div>
+    <div class="search-bar">
+      <div class="search-box js-search-box">
+        <div class="search-box__icon-search"><i class="fas fa-search"></i></div>
+        <input type="text" />
+        <div class="search-box__icon-clear js-icon-clear">
+          <a><i class="fas fa-times"></i></a>
+        </div>
+      </div>
+      <button class="button button--theme-dark button--pill search__cancel js-search-toggle">
+        Cancel</button>
+    </div>
+    <div class="search-result js-search-result"></div>
+  </div>
+</div>
+<script>var SOURCES = window.TEXT_VARIABLES.sources;
+var PAHTS = window.TEXT_VARIABLES.paths;
+window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
+  var search = (window.search || (window.search = {}));
+  var searchData = window.TEXT_SEARCH_DATA || {};
+
+  function memorize(f) {
+    var cache = {};
+    return function () {
+      var key = Array.prototype.join.call(arguments, ',');
+      if (key in cache) return cache[key];
+      else return cache[key] = f.apply(this, arguments);
+    };
+  }
+
+  /// search
+  function searchByQuery(query) {
+    var i, j, key, keys, cur, _title, result = {};
+    keys = Object.keys(searchData);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      for (j = 0; j < searchData[key].length; j++) {
+        cur = searchData[key][j], _title = cur.title;
+        if ((result[key] === undefined || result[key] && result[key].length < 4 )
+          && _title.toLowerCase().indexOf(query.toLowerCase()) >= 0) {
+          if (result[key] === undefined) {
+            result[key] = [];
+          }
+          result[key].push(cur);
+        }
+      }
+    }
+    return result;
+  }
+
+  var renderHeader = memorize(function(header) {
+    return $('<p class="search-result__header">' + header + '</p>');
+  });
+
+  var renderItem = function(index, title, url) {
+    return $('<li class="search-result__item" data-index="' + index + '"><a class="button" href="' + url + '">' + title + '</a></li>');
+  };
+
+  function render(data) {
+    if (!data) { return null; }
+    var $root = $('<ul></ul>'), i, j, key, keys, cur, itemIndex = 0;
+    keys = Object.keys(data);
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      $root.append(renderHeader(key));
+      for (j = 0; j < data[key].length; j++) {
+        cur = data[key][j];
+        $root.append(renderItem(itemIndex++, cur.title, cur.url));
+      }
+    }
+    return $root;
+  }
+
+  // search box
+  var $result = $('.js-search-result'), $resultItems;
+  var lastActiveIndex, activeIndex;
+
+  function clear() {
+    $result.html(null);
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+  }
+  function onInputNotEmpty(val) {
+    $result.html(render(searchByQuery(val)));
+    $resultItems = $('.search-result__item'); activeIndex = 0;
+    $resultItems.eq(0).addClass('active');
+  }
+
+  search.clear = clear;
+  search.onInputNotEmpty = onInputNotEmpty;
+
+  function updateResultItems() {
+    lastActiveIndex >= 0 && $resultItems.eq(lastActiveIndex).removeClass('active');
+    activeIndex >= 0 && $resultItems.eq(activeIndex).addClass('active');
+  }
+
+  function moveActiveIndex(direction) {
+    var itemsCount = $resultItems ? $resultItems.length : 0;
+    if (itemsCount > 1) {
+      lastActiveIndex = activeIndex;
+      if (direction === 'up') {
+        activeIndex = (activeIndex - 1 + itemsCount) % itemsCount;
+      } else if (direction === 'down') {
+        activeIndex = (activeIndex + 1 + itemsCount) % itemsCount;
+      }
+      updateResultItems();
+    }
+  }
+
+  // Char Code: 13  Enter, 37  ⬅, 38  ⬆, 39  ➡, 40  ⬇
+  $(window).on('keyup', function(e) {
+    var modalVisible = search.getModalVisible && search.getModalVisible();
+    if (modalVisible) {
+      if (e.which === 38) {
+        modalVisible && moveActiveIndex('up');
+      } else if (e.which === 40) {
+        modalVisible && moveActiveIndex('down');
+      } else if (e.which === 13) {
+        modalVisible && $resultItems && activeIndex >= 0 && $resultItems.eq(activeIndex).children('a')[0].click();
+      }
+    }
+  });
+
+  $result.on('mouseover', '.search-result__item > a', function() {
+    var itemIndex = $(this).parent().data('index');
+    itemIndex >= 0 && (lastActiveIndex = activeIndex, activeIndex = itemIndex, updateResultItems());
+  });
+});
+</script>
+</div></div>
+
+
+<script>(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function scrollToAnchor(anchor, duration, callback) {
+      var $root = this;
+      $root.animate({ scrollTop: $(anchor).position().top }, duration, function() {
+        window.history.replaceState(null, '', window.location.href.split('#')[0] + anchor);
+        callback && callback();
+      });
+    }
+    $.fn.scrollToAnchor = scrollToAnchor;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function affix(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroll,
+        offsetBottom = 0, scrollTarget = window, scroll = window.document, disabled = false, isOverallScroller = true,
+        rootTop, rootLeft, rootHeight, scrollBottom, rootBottomTop,
+        hasInit = false, curState;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.offsetBottom && (offsetBottom = _options.offsetBottom);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroll && (scroll = _options.scroll);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $scrollTarget = $(scrollTarget);
+        isOverallScroller = window.isOverallScroller($scrollTarget[0]);
+        $scroll = $(scroll);
+      }
+      function preCalc() {
+        top();
+        rootHeight = $root.outerHeight();
+        rootTop = $root.offset().top + (isOverallScroller ? 0 :  $scrollTarget.scrollTop());
+        rootLeft = $root.offset().left;
+      }
+      function calc(needPreCalc) {
+        needPreCalc && preCalc();
+        scrollBottom = $scroll.outerHeight() - offsetBottom - rootHeight;
+        rootBottomTop = scrollBottom - rootTop;
+      }
+      function top() {
+        if (curState !== 'top') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: 0
+          });
+          curState = 'top';
+        }
+      }
+      function fixed() {
+        if (curState !== 'fixed') {
+          $root.addClass('fixed').css({
+            left: rootLeft + 'px',
+            top: 0
+          });
+          curState = 'fixed';
+        }
+      }
+      function bottom() {
+        if (curState !== 'bottom') {
+          $root.removeClass('fixed').css({
+            left: 0,
+            top: rootBottomTop + 'px'
+          });
+          curState = 'bottom';
+        }
+      }
+      function setState() {
+        var scrollTop = $scrollTarget.scrollTop();
+        if (scrollTop >= rootTop && scrollTop <= scrollBottom) {
+          fixed();
+        } else if (scrollTop < rootTop) {
+          top();
+        } else {
+          bottom();
+        }
+      }
+      function init() {
+        if(!hasInit) {
+          var interval, timeout;
+          calc(true); setState();
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState();
+          });
+          $window.on('resize', function() {
+            disabled || (calc(true), setState());
+          });
+          hasInit = true;
+        }
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions,
+        refresh: function() {
+          calc(true, { animation: false }); setState();
+        }
+      };
+    }
+    $.fn.affix = affix;
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    function toc(options) {
+      var $root = this, $window = $(window), $scrollTarget, $scroller, $tocUl = $('<ul class="toc toc--ellipsis"></ul>'), $tocLi, $headings, $activeLast, $activeCur,
+        selectors = 'h1,h2,h3', container = 'body', scrollTarget = window, scroller = 'html, body', disabled = false,
+        headingsPos, scrolling = false, hasRendered = false, hasInit = false;
+
+      function setOptions(options) {
+        var _options = options || {};
+        _options.selectors && (selectors = _options.selectors);
+        _options.container && (container = _options.container);
+        _options.scrollTarget && (scrollTarget = _options.scrollTarget);
+        _options.scroller && (scroller = _options.scroller);
+        _options.disabled !== undefined && (disabled = _options.disabled);
+        $headings = $(container).find(selectors).filter('[id]');
+        $scrollTarget = $(scrollTarget);
+        $scroller = $(scroller);
+      }
+      function calc() {
+        headingsPos = [];
+        $headings.each(function() {
+          headingsPos.push(Math.floor($(this).position().top));
+        });
+      }
+      function setState(element, disabled) {
+        var scrollTop = $scrollTarget.scrollTop(), i;
+        if (disabled || !headingsPos || headingsPos.length < 1) { return; }
+        if (element) {
+          $activeCur = element;
+        } else {
+          for (i = 0; i < headingsPos.length; i++) {
+            if (scrollTop >= headingsPos[i]) {
+              $activeCur = $tocLi.eq(i);
+            } else {
+              $activeCur || ($activeCur = $tocLi.eq(i));
+              break;
+            }
+          }
+        }
+        $activeLast && $activeLast.removeClass('active');
+        ($activeLast = $activeCur).addClass('active');
+      }
+      function render() {
+        if(!hasRendered) {
+          $root.append($tocUl);
+          $headings.each(function() {
+            var $this = $(this);
+            $tocUl.append($('<li></li>').addClass('toc-' + $this.prop('tagName').toLowerCase())
+              .append($('<a></a>').text($this.text()).attr('href', '#' + $this.prop('id'))));
+          });
+          $tocLi = $tocUl.children('li');
+          $tocUl.on('click', 'a', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            scrolling = true;
+            setState($this.parent());
+            $scroller.scrollToAnchor($this.attr('href'), 400, function() {
+              scrolling = false;
+            });
+          });
+        }
+        hasRendered = true;
+      }
+      function init() {
+        var interval, timeout;
+        if(!hasInit) {
+          render(); calc(); setState(null, scrolling);
+          // run calc every 100 millisecond
+          interval = setInterval(function() {
+            calc();
+          }, 100);
+          timeout = setTimeout(function() {
+            clearInterval(interval);
+          }, 45000);
+          window.pageLoad.then(function() {
+            setTimeout(function() {
+              clearInterval(interval);
+              clearTimeout(timeout);
+            }, 3000);
+          });
+          $scrollTarget.on('scroll', function() {
+            disabled || setState(null, scrolling);
+          });
+          $window.on('resize', window.throttle(function() {
+            if (!disabled) {
+              render(); calc(); setState(null, scrolling);
+            }
+          }, 100));
+        }
+        hasInit = true;
+      }
+
+      setOptions(options);
+      if (!disabled) {
+        init();
+      }
+      $window.on('resize', window.throttle(function() {
+        init();
+      }, 200));
+      return {
+        setOptions: setOptions
+      };
+    }
+    $.fn.toc = toc;
+  });
+})();
+/*(function () {
+
+})();*/
+</script><script>
+  /* toc must before affix, since affix need to konw toc' height. */(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  var TOC_SELECTOR = window.TEXT_VARIABLES.site.toc.selectors;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window);
+    var $articleContent = $('.js-article-content');
+    var $tocRoot = $('.js-toc-root'), $col2 = $('.js-col-aside');
+    var toc;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+    var hasToc = $articleContent.find(TOC_SELECTOR).length > 0;
+
+    function disabled() {
+      return $col2.css('display') === 'none' || !hasToc;
+    }
+
+    tocDisabled = disabled();
+
+    toc = $tocRoot.toc({
+      selectors: TOC_SELECTOR,
+      container: $articleContent,
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      tocDisabled = disabled();
+      toc && toc.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+  });
+})();
+(function() {
+  var SOURCES = window.TEXT_VARIABLES.sources;
+  window.Lazyload.js(SOURCES.jquery, function() {
+    var $window = $(window), $pageFooter = $('.js-page-footer');
+    var $pageAside = $('.js-page-aside');
+    var affix;
+    var tocDisabled = false;
+    var hasSidebar = $('.js-page-root').hasClass('layout--page--sidebar');
+
+    affix = $pageAside.affix({
+      offsetBottom: $pageFooter.outerHeight(),
+      scrollTarget: hasSidebar ? '.js-page-main' : null,
+      scroller: hasSidebar ? '.js-page-main' : null,
+      scroll: hasSidebar ? $('.js-page-main').children() : null,
+      disabled: tocDisabled
+    });
+
+    $window.on('resize', window.throttle(function() {
+      affix && affix.setOptions({
+        disabled: tocDisabled
+      });
+    }, 100));
+
+    window.pageAsideAffix = affix;
+  });
+})();
+</script>
+    </div>
+    <script>(function () {
+  var $root = document.getElementsByClassName('root')[0];
+  if (window.hasEvent('touchstart')) {
+    $root.dataset.isTouch = true;
+    document.addEventListener('touchstart', function(){}, false);
+  }
+})();
+</script>
+  </body>
+</html>
+

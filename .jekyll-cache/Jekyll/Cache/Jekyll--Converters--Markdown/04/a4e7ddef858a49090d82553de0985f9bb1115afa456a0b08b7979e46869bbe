@@ -1,0 +1,28 @@
+I"J<h2 id="如何使用selenium来下载pdf">如何使用Selenium来下载PDF？</h2>
+
+<p>今天帮老婆写了个爬虫，遇到了这么一个问题: 需要从某个页面上下载一个PDF文件，但是不管怎么搞，PDF文件都会在Chrome内打开，而不是另存为或者下载。搜了一圈，发现不管中英文的结果都是如何把一个html页面保存成PDF。大概是有将页面保存成PDF的需求的人更多。</p>
+
+<p>这里分享一下结论，希望能帮助到遇到之后相同问题的开发人员:</p>
+
+<ul>
+  <li>在创建<code class="language-plaintext highlighter-rouge">chromedriver</code>的时候，同时传入一个<code class="language-plaintext highlighter-rouge">webdriver.chrome.options.Options</code>, 如下:</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">options</span> <span class="o">=</span> <span class="n">webdriver</span><span class="p">.</span><span class="n">chrome</span><span class="p">.</span><span class="n">options</span><span class="p">.</span><span class="n">Options</span><span class="p">()</span>
+    <span class="c1"># 这里是自定义的下载文件夹地址
+</span>    <span class="n">download_dir</span> <span class="o">=</span> <span class="s">""</span> 
+    <span class="n">options</span><span class="p">.</span><span class="n">add_experimental_option</span><span class="p">(</span><span class="s">'prefs'</span><span class="p">,</span>  <span class="p">{</span>
+        <span class="o">//</span> <span class="n">目标文件夹</span>
+        <span class="s">"download.default_directory"</span><span class="p">:</span> <span class="n">download_dir</span><span class="p">,</span>
+        <span class="o">//</span> <span class="n">关闭用Chrome原生的打开PDF</span>
+        <span class="s">"download.prompt_for_download"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s">"download.directory_upgrade"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">"plugins.always_open_pdf_externally"</span><span class="p">:</span> <span class="bp">True</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="o">//</span> <span class="n">创建webdriver的时候额外传入options</span>
+    <span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="p">.</span><span class="n">Chrome</span><span class="p">(</span><span class="n">chrome_options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>上述的options可以使得Chrome在遇到一个目标为PDF类型的地址时，不会用原生浏览的方式打开它，而是将其保存(下载)到options中指定的目录中。</p>
+:ET
