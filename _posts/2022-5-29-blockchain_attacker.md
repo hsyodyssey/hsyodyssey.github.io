@@ -1,7 +1,7 @@
 ---
 layout: article
 title:  "细说Blockchain中的51% Attack"
-date:   2022-05-10 10:00:00 +0800
+date:   2022-05-29 10:00:00 +0800
 tags: Blockchain Hack
 categories: Blockchain
 ---
