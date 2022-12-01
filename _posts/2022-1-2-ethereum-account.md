@@ -8,11 +8,11 @@ categories: Blockchain
 
 ## 概述
 
-我们常常听到这么一个说法，“Ethereum和Bitcoin最大的不同之一是，Ethereum是基于Account模型的Blockchain系统，而Bitcoin是基于UTXO模型的”。那么，这个另辟蹊径的Account模型究竟不同在何处呢？在本文中我们来探索一下以太坊中的基本数据单元(Metadata)之一的Account。
+我们常常听到这样一个说法，"Ethereum 和 Bitcoin 最大的不同之一是二者使用链上数据模型不同。其中，Bitcoin 是基于 UTXO 模型的 Blockchain/Ledger 系统，Ethereum是基于 Account/State 模型的系统"。那么，这个另辟蹊径的 Account/State 模型究竟不同在何处呢？在本文，我们就来探索一下以太坊中的基本数据单元(Metadata)之一的`Account`。
 
-我们知道，Ethereum的运行依赖于基于交易的状态机模型(Transaction-based State Machine)。其中，状态(State)指的是数据变量在*某一时刻*下的信息。承载State的数据变量，称之为StateObject。当StateObject的数据或信息发生了变化时，我们称为*状态转移*。在Ethereum的运行模型中，StateObject所包含的数据会因为Transaction的执行引发的数据更新/删除/创建而发生变化，从而造成状态转移，StateObject的状态会从当前的State转移到另一个State。
+简单的来说，Ethereum 的运行是一种*基于交易的状态机模型*(Transaction-based State Machine)。整个系统由若干的账户组成 (Account)，类似于银行账户。状态(State)反应了某一账户(Account)在*某一时刻*下的值(value)。在以太坊中，State 对应的基本数据结构，称为 StateObject。当 StateObject 的值发生了变化时，我们称为*状态转移*。在 Ethereum 的运行模型中，StateObject 所包含的数据会因为 Transaction 的执行引发数据更新/删除/创建，引发状态转移，我们说：StateObject 的状态从当前的 State 转移到另一个 State。
 
-在Ethereum中，StateObject的具体实现就是Account。因此，我们提到的State具体指的就是Account在某个时刻的包含的数据的值。
+在 Ethereum 中，承载 StateObject 的具体实例就是 Ethereum 中的 Account。通常，我们提到的 State 具体指的就是 Account 在某个时刻的包含的数据的值。
 
 - Account --> StateObject
 - State   --> The value/data of the Account
@@ -21,20 +21,19 @@ categories: Blockchain
 
 ### EOA
 
-外部账户(EOA)是由用户直接控制的账户，负责签名并发起交易(Transaction)。用户通过Account的私钥来保证对账户数据的控制权。
+外部账户(EOA)是由用户直接控制的账户，负责签名并发起交易(Transaction)。用户通过Account 的私钥来保证对账户数据的控制权。
 
-合约账户(Contract)，简称为合约，是由外部账户通过Transaction创建。合约账户，保存了**不可篡改的图灵完备的代码段**，以及保存一些**持久化的数据**。这些代码段使用专用语言书写(Like: Solidity)，并通常提供一些对外部访问API接口函数。这些API接口可以通过Transaction，或者通过本地/第三方提供的RPC服务来调用。这种模式构成了目前的DApp生态圈的基础。
+合约账户(Contract)，简称为合约，是由外部账户通过Transaction创建的。合约账户，保存了**不可篡改的图灵完备的代码段**，以及一些**持久化的数据变量**。这些代码使用专用的图灵完备的编程语言编写(Solidity)，并通常提供一些对外部访问 API 接口函数。这些 API 接口函数可以通过构造 Transaction，或者通过本地/第三方提供的节点 RPC 服务来调用。这种模式构成了目前的 DApp 生态的基础。
 
-通常，合约中的函数用于计算以及查询或修改合约中的持久化数据。我们经常看到这样的描述"**一旦被记录到区块链上数据不可被修改**，或者**不可篡改的智能合约**"。现在我们知道这种描述是不准确。针对一个链上的智能合约，不可修改/篡改的部分是合约中的代码段，或说是合约中的*函数逻辑*/*代码逻辑是*不可以被修改/篡改的。而链上合约中的持久化的数据是可以通过调用代码段中的函数进行数据操作的(CURD)，包括修改和删除，具体取决于合约函数中的代码逻辑。
+通常，合约中的函数用于计算以及查询或修改合约中的持久化数据。我们经常看到这样的描述"**一旦被记录到区块链上数据不可被修改**，或者**不可篡改的智能合约**"。现在我们知道这种笼统的描述其实是不准确。针对一个链上的智能合约，不可修改/篡改的部分是合约中的代码段，或说合约中的*函数逻辑*/*代码逻辑是*不可以被修改/篡改的。而合约中的**持久化的数据变量**是可以通过调用代码段中的函数进行数据操作的(CURD)。具体的操作方式取决于合约函数中的代码逻辑。
 
-根据*合约中函数是否会修改合约中持久化的变量*，合约中的函数可以分为两种，只读函数和写函数。
-如果用户**只**希望查询某些合约中的持久化数据，而不对数据进行修改的话，那么用户只需要调用相关的只读函数。调用只读函数不需要通过构造一个Transaction来查询数据。用户可以通过直接调用本地数据或者第三方提供的数据，来调用对应的函数。如果用户需要对合约中的数据进行更新，那么他就要构造一个Transaction来请求合约中相对应的鞋函数。注意，当用户通过构造Transaction的方式来调用合约中的函数时，每个Transaction只能调用一个合约中的一个API函数。
+根据*合约中函数是否会修改合约中持久化的变量*，合约中的函数可以分为两种: *只读函数*和*写函数*。如果用户**只**希望查询某些合约中的持久化数据，而不对数据进行修改的话，那么用户只需要调用相关的只读函数。调用只读函数不需要通过构造一个 Transaction 来查询数据。用户可以通过直接调用本地节点或者第三方节点提供的 RPC 接口来直接调用对应的合约中的*只读函数*。如果用户需要对合约中的数据进行更新，那么他就要构造一个Transaction 来调用合约中相对应的*写函数*。注意，每个 Transaction 每次调用一个合约中的一个*写函数*。因为，如果想在链上实现复杂的逻辑，需要将*写函数*接口化，在其中调用更多的逻辑。
 
 对于如何编写合约，以及Ethereum如何解析Transaction并调用对应的合约中API的，我们会在后面的[文章](http://www.hsyodyssey.com/blockchain/2021/07/25/ethereum_txn.html)中详细的进行解析。
 
 ## StateObject, Account, Contract
 
-在实际代码中，这两种Account都是由`stateObject`这一数据结构定义的。`stateObject`的相关代码位于*core/state/state_object.go*文件中，隶属于*package state*。我们摘录了`stateObject`的结构代码，如下所示。通过下面的代码，我们可以观察到，`stateObject`是由小写字母开头。根据go语言的特性，我们可以知道这个结构主要用于package内部数据操作，并不对外暴露。
+在实际代码中，这两种 Account 都是由`stateObject`这一数据结构定义的。`stateObject`的相关代码位于*core/state/state_object.go*文件中，隶属于*package state*。我们摘录了`stateObject`的结构代码，如下所示。通过下面的代码，我们可以观察到，`stateObject`是由小写字母开头。根据 go 语言的特性，我们可以知道这个结构主要用于 package 内部数据操作，并不对外暴露。
 
 ```go
   type stateObject struct {
@@ -65,7 +64,7 @@ categories: Blockchain
 
 ### Address
 
-在`stateObject`这一结构体中，开头的两个成员变量为`address`以及address的哈希值`addrHash`。`address`是common.Address类型，`addrHash`是common.Hash类型，它们分别对应了一个20字节长度的byte数组和一个32字节长度的byte数组。关于这两种数据类型的定义如下所示。
+在`stateObject`这一结构体中，开头的两个成员变量为`address`以及 address 的哈希值`addrHash`。`address`是common.Address类型，`addrHash`是common.Hash类型，它们分别对应了一个**20字节**长的byte类型数组和一个32字节长的byte类型数组。关于这两种数据类型的定义如下所示。
 
 ```go
 // Lengths of hashes and addresses in bytes.
