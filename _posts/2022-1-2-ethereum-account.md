@@ -99,18 +99,18 @@ type StateAccount struct {
 
 其中的包含四个变量为:
 
-- Nonce 表示该账户发送的交易序号，随着账户发送的交易数量的增加而单调增加。每次发送一个交易，Nonce的值就会加1。
-- Balance 表示该账户的余额。这里的余额指的是链上的Global/Native Token Ether。
-- Root 表示当前账户的下Storage层的 Merkle Patricia Trie的Root。EOA账户这个部分为空值。
-- CodeHash是该账户的Contract代码的哈希值。EOA账户这个部分为空值。
+- Nonce 表示该账户发送的交易序号，随着账户发送的交易数量的增加而单调增加。每次发送一个交易，Nonce 的值就会加1。
+- Balance 表示该账户的余额。这里的余额指的是链上的 Native Token Ether (以太)。
+- Root 表示当前账户的下 Storage 层的 Merkle Patricia Trie的 Root。这里的存储层是为了管理合约中持久化变量准备的。对于 EOA账户这个部分为空值。
+- CodeHash是该账户的Contract代码的哈希值。同样的，这个变量是用于保存合约账户中的代码的 hash ，EOA账户这个部分为空值。
 
 ### db
 
-上述的几个成员变量基本覆盖了Account主工作流相关的全部成员变量。那么继续向下看，我们会遇到db和dbErr这两个成员变量。db这个变量保存了一个StateDB类型的指针。这是为了方便调用StateDB相关的API对Account所对应的stateObject进行操作。StateDB本质上是Ethereum用于管理stateObject信息的而抽象出来的内存数据库。所有的Account数据的更新，检索都会使用StateDB提供的API。关于StateDB的具体实现，功能，以及如何与更底层(leveldb)进行结合的，我们会在之后的文章中进行详细描述。
+上述的几个成员变量基本覆盖了 Account 主生命周期相关的全部成员变量。那么我们继续向下看，会遇到`db`和`dbErr`这两个成员变量。db这个变量保存了一个 `StateDB` 类型的指针。这是为了方便调用 `StateDB` 相关的API对Account所对应的 `stateObject` 进行操作。StateDB本质上是用于管理`stateObject`信息的而抽象出来的内存数据库。所有的Account 数据的更新，检索都会使用 StateDB 提供的API。关于 StateDB 的具体实现，功能，以及如何与更底层物理存储层(leveldb)进行结合的，我们会在之后的文章中进行详细描述。
 
 ### Cache
 
-对于剩下的成员变量，它们的主要用于内存Cache。trie用于保存Contract中的持久化存储的数据，code用于缓存contract中的代码段到内存中，它是一个byte数组。剩下的四个Storage字段主要在执行Transaction的时候缓存Contract合约修改的持久化数据，比如dirtyStorage就用于缓存在Block被Finalize之前，Transaction所修改的合约中的持久化存储数据。对于外部账户，由于没有代码字段，所以对应stateObject对象中的code字段，以及四个Storage类型的字段对应的变量的值都为空(originStorage, pendingStorage, dirtyStorage, fakeStorage)。
+对于剩下的成员变量，它们的主要用于内存Cache。trie用于保存和管理合约账户中的持久化变量存储的数据，code用于缓存合约中的代码段到内存中，它是一个byte数组。剩下的四个Storage 字段主要在执行 Transaction 的时候缓存合约修改的持久化数据，比如dirtyStorage 就用于缓存在 Block 被 Finalize 之前，Transaction所修改的合约中的持久化存储数据。对于外部账户，由于没有代码字段，所以对应 stateObject 对象中的code 字段，以及四个 Storage 类型的字段对应的变量的值都为空(originStorage, pendingStorage, dirtyStorage, fakeStorage)。
 
 从调用关系上看，这四个缓存变量的调用关系是originStorage --> dirtyStorage--> pendingStorage。关于Contract的Storage层的详细信息，我们会在后面部分进行详细的描述。
 
@@ -120,13 +120,19 @@ type StateAccount struct {
 
 #### 账户安全的问题
 
-我们经常会在各种科技网站，自媒体上听到这样的说法，"用户在区块链系统中保存的Cryptocurrency/Token，除了用户自己，不存在一个中心化的第三方可以不经过用户的允许转走你的财富"。这个说法基本是正确的。目前，用户账户里的由链级别定义Crypto，或者称为原生货币(Native Token)，比如Ether，Bitcoin，BNB(Only in BSC)，是没办法被第三方在不被批准的情况下转走的。这是因为链级别上的所有数据的修改都要经过用户私钥(Private Key)签名的Transaction。只要用户保管好自己账户的私钥(Private Key)，保证其没有被第三方知晓，就没有人可以转走你链上的财富。
+我们经常会在各种科技网站/自媒体上看到这样的说法，"用户在区块链系统中保存的Cryptocurrency/Token，除了用户自己，不存在第三方可以不经过用户的允许转走你的财富"。这个说法基本是正确的。目前，用户账户里的由链级别定义的 Crypto/Token，或者称为原生货币(Native Token)，比如Ether，Bitcoin，BNB(Only in BSC)，是没办法被第三方在不被批准的情况下转走的。这是因为链级别上的所有数据的修改都要执行由用户私钥(Private Key)签名的Transaction。因此，只要用户保管好自己账户的私钥(Private Key)，保证其没有被第三方知晓，就没有人可以转走你链上的财富。
 
-我们说上述说法是基本正确，而不是完全正确的原因有两个。首先，用户的链上数据安全是基于当前Ethereum使用的密码学工具足够保证：不存在第三方可以在**有限的时间**内在**不知道用户私钥的前提**下获取到用户的私钥信息来伪造签名交易。当然这个安全保证前提是当今Ethereum使用的密码学工具的强度足够大，没有计算机可以在有限的时间内hack出用户的私钥信息。在量子计算机出现之前，目前Ethereum和其他Blockchain使用的密码学工具的强度都是足够安全的。这也是为什么很多新的区块链项目在研究抗量子计算机密码体系的原因。第二点原因是，当今很多的所谓的Crypto/Token并不是链级别的数据，而是在链上合约中存储的数据，比如ERC-20 Token和NFT对应的ERC-721的Token。由于这部分的Token都是基于合约代码生成和维护的，所以这部分Token的安全依赖于合约本身的安全。如果合约本身的代码是有问题的，存在后门或者漏洞，比如存在给第三方任意提取其他账户下Token的漏洞，那么即使用户的私钥信息没有泄漏，合约中的Token仍然可以被第三方获取到。由于合约的代码段在链上是不可修改的，合约代码的安全性是极其重要的。所以，有很多研究人员，技术团队在进行合约审计方面的工作，来保证上传的合约代码是安全的。此外随着Layer-2技术和一些跨链技术的发展，用户持有的“Token”，在很多情况下不是我们上面提到的安全的Naive Token，而是ERC-20甚至只是其他合约中的简单数值记录。这种类型的资产的安全性是低于layer-1上的Native Token的。用户在持有这类资产的时候需要小心。这里我们推荐阅读Jay Freeman所分析的关于一个热门Layer-2系统Optimism上的由于非Naive Token造成的[任意提取漏洞](https://www.saurik.com/optimism.html)。
+我们说上述说法是基本正确，而不是完全正确。原因有两个。首先，用户的链上数据安全是基于当前Ethereum使用的密码学工具足够保证：不存在第三方可以在**有限的时间**内在**不知道用户私钥的前提**下获取到用户的私钥信息来伪造签名交易。当然这个安全保证前提是当今Ethereum使用的密码学工具的强度足够大，没有计算机可以在有限的时间内 hack 出用户的私钥信息。在量子计算机出现之前，目前 Ethereum 和其他 Blockchain 使用的密码学工具的强度都是足够安全的。这也是为什么很多新的区块链项目在研究抗量子计算机密码体系的原因。第二点原因是，当今很多的所谓的 Crypto/Token 并不是链级别的代币，而是保存在合约中持久化变量中的数据，比如 ERC-20 Token 和NFT对应的 ERC-721 的Token。由于这部分的Token都是基于合约代码生成和维护的，所以这部分 Token 的安全依赖于合约本身的安全。如果合约本身的代码是有问题的，存在后门或者漏洞，比如存在给第三方任意提取其他账户下 Token 的漏洞。那么即使用户的私钥信息没有泄漏，合约中的Token仍然可以被第三方获取到。由于合约的代码段在链上是不可修改的，因此合约代码的安全性是极其重要的。目前有很多研究人员，技术团队在进行合约审计方面的工作，来保证上传的合约代码是安全的。随着Layer-2技术和一些跨链技术的发展，用户持有的`Token`，在很多情况下不是我们上面提到的安全的 Naive Token，而是 ERC-20 甚至只是其他合约中的简单数值记录。这种类型的资产的安全性是远低于低于layer-1上的 Native Toke n的。用户在持有这类资产的时候需要小心。这里我们推荐阅读 Jay Freeman 所分析的关于一个热门Layer-2系统Optimism上的由于非Naive Token造成的[任意提取漏洞](https://www.saurik.com/optimism.html)。
 
 下面我们简单讲述，一个账户的私钥和地址是如何产生的。- 这部分的示例代码位于: [https://github.com/hsyodyssey/Understanding-Ethereum-Go-version/blob/main/example/signature/main.go](example/signature)]中。
 
 #### Account Generation
+
+首先，EOA账户的创建分为本地创建和链上注册两个部分。当我们使用诸如 Metamask 等钱包工具创建账户的时候，在区块链上并没有同步注册账户信息。链上账户的创建和管理都是通过`StateDB`模块来操作的，因此我们将`geth`中账户管理部分的代码整合到`StateDB`模块章节来一起讲述。而合约账户，或者说智能合约的创建是需要通过 EOA 账户构造特定的交易生成的。关于这部分的细节我们也放在之后的章节中进行解析。
+
+下面我们简单分析一下，如何在本地创建一个 EOA 账户的。
+
+总的来说，创建新账户的依赖的入口函数`NewAccount`位于 `accounts/keystore/keystore.go`文件中。函数有一个string类型的passphrase参数。注意，这个参数仅用于加密本地保存私钥的Keystore文件，与生成账户的私钥，地址的生成都无关。
 
 - 首先我们通过随机得到一个长度64位account的私钥。这个私钥就是平时需要用户激活钱包时需要的记录，一旦这个私钥暴露了，钱包也将不再安全。
   - 64个16进制位，256bit，32字节
