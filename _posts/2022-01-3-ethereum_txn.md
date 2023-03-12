@@ -1,6 +1,6 @@
 ---
 layout: article
-title:  "理解以太坊Go-Ethereum 源码剖析(02): 一个Ethereum Transaction的生老病死"
+title:  "理解以太坊 Go-Ethereum 源码剖析(02): 一个Ethereum Transaction的生老病死"
 date:   2022-01-03 10:00:00 +0800
 tags: Blockchain Ethereum Go
 categories: Blockchain
@@ -9,7 +9,7 @@ categories: Blockchain
 
 ## 概述
 
-在[Account章节](http://www.hsyodyssey.com/blockchain/2022/01/02/ethereum-account.html)的开头，我们提到了，Ethereum的运行依赖于基于交易的状态机模型(Transaction-based State Machine)。本章我们就来探索一下，Ethereum中的另一个基本数据单元Transaction。在本文中，我们提到的交易指的是在Ethereum Layer-1层面上构造的交易，以太坊生态中的Layer-2中的交易不在我们的讨论中。
+在[Account章节](http://www.hsyodyssey.com/blockchain/2022/01/02/ethereum-account.html)的开头，我们提到了，Ethereum 的运行依赖于基于交易的状态机模型(Transaction-based State Machine)。本章我们就来探索一下，Ethereum中的另一个基本数据单元Transaction。在本文中，我们提到的交易指的是在Ethereum Layer-1层面上构造的交易，以太坊生态中的Layer-2中的交易不在我们的讨论中。
 
 Transaction是Ethereum执行数据操作的媒介。它主要起到下面的几个作用:
 

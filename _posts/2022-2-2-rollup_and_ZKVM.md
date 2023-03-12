@@ -6,7 +6,7 @@ tags: Blockchain Ethereum ZKP Layer-2 Rollup zk-Rollup
 categories: Blockchain
 ---
 
-自从[EIP-1559](https://eips.ethereum.org/EIPS/eip-1559)生效后，由于币价的升高，和基础Gas Price的约束，Ethereum Mainnet上的单笔交易费用已经高到了离谱的程度。在上个月的一次实验中，我尝试了一把在Layer-1上调用一次古早的合约，大概花了100美刀左右的交易费。就像社区内经常听到的抱怨声那样，Ethereum  Mainnet已经成为了普通用户用不起的贵族链。
+自从[EIP-1559](https://eips.ethereum.org/EIPS/eip-1559)生效后，由于币价的升高，和基础 Gas Price 的约束，Ethereum Mainnet上的单笔交易费用已经高到了离谱的程度。在上个月的一次实验中，我尝试了一把在Layer-1上调用一次古早的合约，大概花了100美刀左右的交易费。就像社区内经常听到的抱怨声那样，Ethereum  Mainnet已经成为了普通用户用不起的贵族链。
 
 显然，目前**天价的交易费**以及**有限的Throughput**已经成为了限制Ethereum继续发展的两大难题。幸运的是，**rollup**技术的发展给社区展现了一种似乎可以一招解决两大难题的绝世武学。
 

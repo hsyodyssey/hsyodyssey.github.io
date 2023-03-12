@@ -38,10 +38,10 @@ author:
   name      : Siyuan Han
   url       :
   avatar    : # path or url of avatar image (square)
-  bio       : PhD Student/Database/Blockchain/Golang/Python/Java.
+  bio       : PhD Student on  Database& Blockchain | Researcher @ABCDE Capital.
   email     : shanaj@connect.ust.hk
   facebook  : # "user_name" the last part of your profile url, e.g. https://www.facebook.com/user_name
-  twitter   : siyuanhanust # "user_name" the last part of your profile url, e.g. https://twitter.com/user_name
+  twitter   : cyodyssey # "user_name" the last part of your profile url, e.g. https://twitter.com/user_name
   weibo     : # "user_id"   the last part of your profile url, e.g. https://www.weibo.com/user_id/profile?...
   googleplus: # "user_id"   the last part of your profile url, e.g. https://plus.google.com/u/0/user_id
   telegram  : # "user_name" the last part of your profile url, e.g. https://t.me/user_name
@@ -97,7 +97,7 @@ chart: # false (default), true
 
 ## => Paginate
 ##############################
-paginate: 8
+paginate: 10
 paginate_path: /page:num # don't change this unless for special need
 
 
