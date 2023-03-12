@@ -1,6 +1,6 @@
 ---
 layout: article
-title:  "Understanding Ethereum: Starting with go-ethereum Source Code｜理解以太坊: Go-Ethereum 源码剖析"
+title:  "理解以太坊: Go-Ethereum 源码剖析"
 date:   2022-01-01 10:00:00 +0800
 tags: Blockchain Ethereum Go
 categories: Blockchain

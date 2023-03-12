@@ -1,6 +1,6 @@
 ---
 layout: article
-title:  "如何使用Selenium来下载PDF文件"
+title:  "如何使用 Selenium 来下载 PDF 文件"
 date:   2022-05-10 10:00:00 +0800
 tags: Blockchain ZKP Groth16
 categories: Python Selenium
@@ -8,9 +8,9 @@ categories: Python Selenium
 
 ## 如何使用Selenium来下载PDF？
 
-今天帮老婆写了个爬虫，遇到了这么一个需求: 从给定的页面上下载一个PDF文件。
+今天帮老婆写了个爬虫，遇到了这么一个需求: 从给定的页面上下载一个 PDF 文件。
 
-但是我们遇到的问题是：不管怎么处理，PDF文件都会在模拟下载后使用Chrome打开，而不是另存为到目标文件夹。搜了一圈，发现不管中英文的结果都是如何把一个html页面保存成PDF。大概是有将页面保存成PDF的需求的人更多。
+但是我们遇到的问题是：不管怎么处理，PDF文件都会在模拟下载后使用 Chrome 打开，而不是另存为到目标文件夹。搜了一圈，发现不管中英文的结果都是如何把一个 html 页面保存成PDF。大概是有将页面保存成 PDF 的需求的人更多。
 
 这里分享一下结论，希望能帮助到遇到之后相同问题的开发人员:
 
@@ -33,4 +33,4 @@ categories: Python Selenium
     driver = webdriver.Chrome(chrome_options=options)
 ```
 
-上述的options可以使得Chrome在遇到一个目标为PDF类型的地址时，不会用原生浏览的方式打开它，而是将其保存(下载)到options中指定的目录中。
+上述的 options 可以使得 Chrome 在遇到一个目标为 PDF 类型的地址时，不会用原生浏览的方式打开它，而是将其保存(下载)到 options 中指定的目录中。
