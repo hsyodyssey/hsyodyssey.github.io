@@ -26,7 +26,9 @@ titles:
 key: page-about
 ---
 
+[[bio]](https://home.cse.ust.hk/~shanaj/)
 
-I'm a Ph.D. student at HKUST, CSE, supervised by Prof. Lei Chen. [[bio]](https://home.cse.ust.hk/~shanaj/)
-
-I was a white hat (Certified by Wooyun).
+- I'm a Ph.D. student at HKUST, CSE. 
+- I participated in the development of Scroll's Sequencer.
+- I am a technical Consultant at ABCDE Capital.
+- I was a white hat (Certified by Wooyun).
