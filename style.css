@@ -4,10 +4,10 @@ html {
 
 body.main {
     font-family: monospace;
-    font-size: 0.98rem;
+    font-size: 1rem;
     /* text-sm */
     color: #000000;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 /* .container {
@@ -21,11 +21,11 @@ body.main {
 
 .navbar {
     background-color: #F9FBE7;
-    padding: 1rem 0;
+    padding: 0.75rem 0;
 }
 
 .container {
-    max-width: 57em;
+    max-width: 59em;
     margin: 0 auto;
     display: flex;
     justify-content: flex-end;
@@ -55,10 +55,12 @@ body.main {
     color: #000000;
 }
 
+h1.name,
 h2.name {
     font-size: 1.5rem;
     font-weight: bold;
-    margin-bottom: 1rem;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
     color: #000000;
     border-bottom: none;
 }
@@ -66,15 +68,15 @@ h2.name {
 h4.projects-title {
     font-size: 1.25rem;
     font-weight: bold;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
     color: #000000;
     border-bottom: 1px solid #000000;
     padding-bottom: 0.5rem;
 }
 
 p {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 a.link {
@@ -89,11 +91,11 @@ a.link:hover {
 div.container {
     padding-left: 1em;
     padding-right: 1em;
-    padding-top: 1em;
+    padding-top: 0.65em;
 }
 
 div.intro {
-    width: 88%;
+    width: 98%;
     margin: auto;
 }
 
@@ -115,7 +117,7 @@ div.boxed {
 }
 
 .project-item {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .project-meta {
